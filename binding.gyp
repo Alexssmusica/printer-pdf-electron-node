@@ -14,8 +14,7 @@
             },
             "sources": [
                 "src/pdfium.cc",
-                "src/pdfium_option.cc",
-                "src/pdfium_imp.cc"
+                "src/pdfium_option.cc"
             ],
             "include_dirs": [
                 "<!@(node -p \"require('node-addon-api').include\")",
@@ -28,7 +27,8 @@
             "conditions": [
                 ["OS=='win'", {
                     "sources": [
-                        "src/printer_win.cc"
+                        "src/printer_win.cc",
+                        "src/pdfium_imp.cc"
                     ],
                     "conditions": [
                         ["target_arch=='x64'", {

@@ -7,13 +7,16 @@ using namespace std;
 
 namespace printer_pdf_node_electron {
 
-printer_pdf_node_electron::PDFDocument::PDFDocument(std::wstring &&f) : filename(f)
+#ifdef _WIN32
+
+PDFDocument::PDFDocument(std::wstring &&f) : filename(f)
 {
 }
 
-bool printer_pdf_node_electron::PDFDocument::LoadDocument()
+bool PDFDocument::LoadDocument()
 {
-    std::ifstream pdfStream = std::ifstream(filename, std::ifstream::binary | std::ifstream::in);
+    std::ifstream pdfStream = std::ifstream(std::string(filename.begin(), filename.end()), 
+                                          std::ifstream::binary | std::ifstream::in);
     file_content.insert(file_content.end(), std::istreambuf_iterator<char>(pdfStream), std::istreambuf_iterator<char>());
     auto pdf_pointer = FPDF_LoadMemDocument(file_content.data(), (int)file_content.size(), nullptr);
 
@@ -25,9 +28,9 @@ bool printer_pdf_node_electron::PDFDocument::LoadDocument()
     return true;
 }
 
-void printer_pdf_node_electron::PDFDocument::PrintDocument(HDC dc, const PdfiumOption &options)
+void PDFDocument::PrintDocument(DeviceContext dc, const PdfiumOption &options)
 {
-    printer_pdf_node_electron::PrinterDocumentJob djob(dc, filename.c_str());
+    PrinterDocumentJob djob(dc, filename.c_str());
 
     auto pageCount = FPDF_GetPageCount(doc.get());
 
@@ -56,11 +59,11 @@ void printer_pdf_node_electron::PDFDocument::PrintDocument(HDC dc, const PdfiumO
     }
 }
 
-void printer_pdf_node_electron::PDFDocument::printPage(HDC dc,
+void PDFDocument::printPage(DeviceContext dc,
                                          int32_t index, int32_t width, int32_t height, float dpiRatio,
                                          const PdfiumOption &options)
 {
-    printer_pdf_node_electron::PrinterPageJob pJob(dc);
+    PrinterPageJob pJob(dc);
     auto page = getPage(doc.get(), index);
 
     if (!page)
@@ -145,18 +148,18 @@ void printer_pdf_node_electron::PDFDocument::printPage(HDC dc,
         }
     }
 
-    // Render the PDF page - ajustando o posicionamento para considerar os offsets físicos corretamente
+    // Render the PDF page
     ::FPDF_RenderPage(dc,  // DC handle
                      page,  // page handle
-                     x,  // start x (já inclui o offset físico)
-                     y,  // start y (já inclui o offset físico)
+                     x,  // start x
+                     y,  // start y
                      static_cast<int32_t>(width * scale),  // size x
                      static_cast<int32_t>(height * scale),  // size y
                      0,  // rotate
                      FPDF_ANNOT | FPDF_PRINTING);  // flags
 }
 
-FPDF_PAGE printer_pdf_node_electron::PDFDocument::getPage(const FPDF_DOCUMENT &doc, int32_t index)
+FPDF_PAGE PDFDocument::getPage(const FPDF_DOCUMENT &doc, int32_t index)
 {
     auto iter = loaded_pages.find(index);
     if (iter != loaded_pages.end())
@@ -171,5 +174,7 @@ FPDF_PAGE printer_pdf_node_electron::PDFDocument::getPage(const FPDF_DOCUMENT &d
     loaded_pages[index] = std::move(page);
     return page_ptr;
 }
+
+#endif
 
 } 
