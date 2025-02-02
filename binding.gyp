@@ -63,24 +63,24 @@
                     ],
                     "conditions": [
                         ["target_arch=='x64'", {
-                            "libraries": ["<(module_root_dir)/pdfium/lib/linux/x64/libpdfium.so"],
+                            "libraries": ["<(module_root_dir)/pdfium/lib/linux/x64/lib/libpdfium.so"],
                             "copies": [{
                                 "destination": "<(PRODUCT_DIR)",
-                                "files": ["<(module_root_dir)/pdfium/lib/linux/x64/libpdfium.so"]
+                                "files": ["<(module_root_dir)/pdfium/lib/linux/x64/lib/libpdfium.so"]
                             }]
                         }],
                         ["target_arch=='ia32'", {
-                            "libraries": ["<(module_root_dir)/pdfium/lib/linux/x86/libpdfium.so"],
+                            "libraries": ["<(module_root_dir)/pdfium/lib/linux/x86/lib/libpdfium.so"],
                             "copies": [{
                                 "destination": "<(PRODUCT_DIR)",
-                                "files": ["<(module_root_dir)/pdfium/lib/linux/x86/libpdfium.so"]
+                                "files": ["<(module_root_dir)/pdfium/lib/linux/x86/lib/libpdfium.so"]
                             }]
                         }],
                         ["target_arch=='arm64'", {
-                            "libraries": ["<(module_root_dir)/pdfium/lib/linux/arm64/libpdfium.so"],
+                            "libraries": ["<(module_root_dir)/pdfium/lib/linux/arm64/lib/libpdfium.so"],
                             "copies": [{
                                 "destination": "<(PRODUCT_DIR)",
-                                "files": ["<(module_root_dir)/pdfium/lib/linux/arm64/libpdfium.so"]
+                                "files": ["<(module_root_dir)/pdfium/lib/linux/arm64/lib/libpdfium.so"]
                             }]
                         }]
                     ]
