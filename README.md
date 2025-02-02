@@ -13,10 +13,26 @@ Uma biblioteca Node.js para impressão de arquivos PDF com suporte avançado a c
 - 📚 Impressão de múltiplas cópias
 - 💪 Suporte completo a TypeScript
 
+## Requisitos
+
+- Node.js >= 18.20.6
+- Electron >= 20.0.0
+- Windows ou Linux
+- Para Windows: Visual Studio Build Tools
+- Para Linux: CUPS development headers (`sudo apt-get install libcups2-dev`)
+
 ## Instalação
 
 ```bash
 npm install printer-pdf-node-electron
+```
+
+Para desenvolvimento:
+```bash
+git clone https://github.com/Alexssmusica/printer-pdf-node-electron.git
+cd printer-pdf-node-electron
+npm install
+npm run rebuild
 ```
 
 ## Uso
@@ -142,12 +158,6 @@ interface Margins {
 - Para tamanhos de papel personalizados (paperSize: 'CUSTOM'), width e height são especificados em pontos (1 ponto = 1/72 polegada)
 - O DPI padrão é 300, que oferece um bom equilíbrio entre qualidade e performance
 - A opção fitToPage garante que o conteúdo se ajuste à área imprimível da página
-
-## Requisitos do Sistema
-
-- Node.js >= 14.0.0
-- Windows, macOS ou Linux
-- Electron (opcional)
 
 ## Licença
 

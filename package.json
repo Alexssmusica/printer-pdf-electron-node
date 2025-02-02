@@ -40,10 +40,10 @@
   },
   "homepage": "https://github.com/Alexssmusica/printer-pdf-node-electron#readme",
   "dependencies": {
-    "bindings": "^1.5.0",
+    "bindings": "1.5.0",
+    "dotenv": "16.4.7",
     "node-addon-api": "8.3.0",
-    "node-gyp": "^11.0.0",
-    "cross-env": "^7.0.3"
+    "node-gyp": "11.0.0"
   },
   "devDependencies": {
     "@semantic-release/changelog": "6.0.3",
@@ -53,7 +53,10 @@
     "@semantic-release/npm": "12.0.1",
     "@semantic-release/release-notes-generator": "14.0.3",
     "@types/node": "22.12.0",
-     "prebuild": "13.0.1",
+    "prebuild": "13.0.1",
     "typescript": "5.7.3"
+  },
+  "engines": {
+    "node": ">= 18.20.6"
   }
 }

@@ -64,3 +64,4 @@ build
 prebuilds
 .DS_Store
 src/.DS_Store
+.prebuildrc

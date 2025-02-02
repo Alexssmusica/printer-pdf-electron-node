@@ -56,15 +56,15 @@
                     "conditions": [
                         ["target_arch=='x64'", {
                             "libraries": ["-lpdfium"],
-                            "library_dirs": ["./pdfium/lib/linux/x64"]
+                            "library_dirs": ["<(module_root_dir)/pdfium/lib/linux/x64"]
                         }],
                         ["target_arch=='ia32'", {
                             "libraries": ["-lpdfium"],
-                            "library_dirs": ["./pdfium/lib/linux/x86"]
+                            "library_dirs": ["<(module_root_dir)/pdfium/lib/linux/x86"]
                         }],
                         ["target_arch=='arm64'", {
                             "libraries": ["-lpdfium"],
-                            "library_dirs": ["./pdfium/lib/linux/arm64"]
+                            "library_dirs": ["<(module_root_dir)/pdfium/lib/linux/arm64"]
                         }]
                     ]
                 }]
