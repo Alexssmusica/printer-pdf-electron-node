@@ -63,16 +63,34 @@
                     ],
                     "conditions": [
                         ["target_arch=='x64'", {
-                            "libraries": ["-lpdfium"],
-                            "library_dirs": ["<(module_root_dir)/pdfium/lib/linux/x64"]
+                            "libraries": ["<(module_root_dir)/pdfium/lib/linux/x64/libpdfium.so"],
+                            "copies": [{
+                                "destination": "<(PRODUCT_DIR)",
+                                "files": ["<(module_root_dir)/pdfium/lib/linux/x64/libpdfium.so"]
+                            }],
+                            "ldflags": [
+                                "-Wl,-rpath,'$$ORIGIN'"
+                            ]
                         }],
                         ["target_arch=='ia32'", {
-                            "libraries": ["-lpdfium"],
-                            "library_dirs": ["<(module_root_dir)/pdfium/lib/linux/x86"]
+                            "libraries": ["<(module_root_dir)/pdfium/lib/linux/x86/libpdfium.so"],
+                            "copies": [{
+                                "destination": "<(PRODUCT_DIR)",
+                                "files": ["<(module_root_dir)/pdfium/lib/linux/x86/libpdfium.so"]
+                            }],
+                            "ldflags": [
+                                "-Wl,-rpath,'$$ORIGIN'"
+                            ]
                         }],
                         ["target_arch=='arm64'", {
-                            "libraries": ["-lpdfium"],
-                            "library_dirs": ["<(module_root_dir)/pdfium/lib/linux/arm64"]
+                            "libraries": ["<(module_root_dir)/pdfium/lib/linux/arm64/libpdfium.so"],
+                            "copies": [{
+                                "destination": "<(PRODUCT_DIR)",
+                                "files": ["<(module_root_dir)/pdfium/lib/linux/arm64/libpdfium.so"]
+                            }],
+                            "ldflags": [
+                                "-Wl,-rpath,'$$ORIGIN'"
+                            ]
                         }]
                     ]
                 }]
