@@ -1,6 +1,11 @@
 #include "inc.h"
 
+#ifdef _WIN32
 #include "printer_win.h"
+#else
+#include "printer_linux.h"
+#endif
+
 #include "pdfium_option.h"
 #include "pdfium_imp.h"
 
@@ -71,9 +76,9 @@ namespace printer_pdf_node_electron
         const Napi::Value &v8_options = args[2];
 
         CHECK_STRING(printerName)
-
         CHECK_STRING(filePath)
 
+#ifdef _WIN32
         Unique_HDC printer_dc = std::move(GetPrinterDC(printerName));
 
         if (printer_dc == nullptr)
@@ -104,6 +109,25 @@ namespace printer_pdf_node_electron
             checkError(env, basicErrInfo + std::string(filePathStr), e.what());
             return;
         }
+#else
+        auto printer_ctx = GetPrinterContext(printerName);
+        if (printer_ctx == nullptr)
+        {
+            Napi::Error::New(env, "Failed to initialize printer context").ThrowAsJavaScriptException();
+            return;
+        }
+
+        auto filePathStr = filePath.As<Napi::String>();
+        std::string filePathUtf8 = filePathStr.Utf8Value();
+
+        if (!PrintPDFToCups(printerName.As<Napi::String>().Utf8Value(), 
+                           filePathUtf8,
+                           printer_ctx.get()))
+        {
+            Napi::Error::New(env, "Failed to print document").ThrowAsJavaScriptException();
+            return;
+        }
+#endif
     }
 
     Napi::Object Init(Napi::Env env, Napi::Object exports)
@@ -115,5 +139,4 @@ namespace printer_pdf_node_electron
     }
 
     NODE_API_MODULE(printer_pdf_node_electron, Init)
-
 } 

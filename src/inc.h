@@ -12,5 +12,11 @@
 #include <uv.h>
 #include <fpdfview.h>
 #include <cpp/fpdf_scopers.h>
+
+#ifdef _WIN32
 #include <Windows.h>
+#else
+#include <cups/cups.h>
+#endif
+
 #endif

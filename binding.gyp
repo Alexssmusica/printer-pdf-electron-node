@@ -15,7 +15,6 @@
             "sources": [
                 "src/pdfium.cc",
                 "src/pdfium_imp.cc",
-                "src/printer_win.cc",
                 "src/pdfium_option.cc"
             ],
             "include_dirs": [
@@ -28,6 +27,9 @@
             "defines": [ "NAPI_DISABLE_CPP_EXCEPTIONS" ],
             "conditions": [
                 ["OS=='win'", {
+                    "sources": [
+                        "src/printer_win.cc"
+                    ],
                     "conditions": [
                         ["target_arch=='x64'", {
                             "libraries": ["<(module_root_dir)/pdfium/lib/win/x64/lib/pdfium.dll.lib"],
@@ -53,6 +55,12 @@
                     ]
                 }],
                 ["OS=='linux'", {
+                    "sources": [
+                        "src/printer_linux.cc"
+                    ],
+                    "libraries": [
+                        "-lcups"
+                    ],
                     "conditions": [
                         ["target_arch=='x64'", {
                             "libraries": ["-lpdfium"],
