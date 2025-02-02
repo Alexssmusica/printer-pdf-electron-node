@@ -20,7 +20,6 @@ std::unique_ptr<PdfiumOption> V8OptionToStruct(const Napi::Value &options)
     if (options.IsObject())
     {
         auto obj = options.ToObject();
-        auto env = options.Env();
 
         INIT_PDFIUM_OPTION(dpi);
         INIT_PDFIUM_OPTION(copies);
