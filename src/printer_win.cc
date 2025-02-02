@@ -1,26 +1,37 @@
-#include "printer_win.h"
-#include <iostream>
+#include "printer_interface.h"
+#include "pdfium_imp.h"
 
 namespace printer_pdf_node_electron
 {
-Unique_HDC GetPrinterDC(const Napi::Value &printerName)
-{
+
+bool WindowsPrinter::Initialize(const Napi::Value& printerName) {
     const Napi::String printerNameV8Str = printerName.ToString();
-
-    Unique_HDC printerDC(::CreateDCW(L"WINSPOOL", reinterpret_cast<LPCWSTR>(printerNameV8Str.Utf16Value().c_str()), NULL, NULL));
-
-    return printerDC;
+    printer_dc = ::CreateDCW(L"WINSPOOL", 
+                           reinterpret_cast<LPCWSTR>(printerNameV8Str.Utf16Value().c_str()), 
+                           NULL, 
+                           NULL);
+    return printer_dc != nullptr;
 }
-Unique_HPrinter GetPrinterHanlde(const Napi::Value &printerName)
-{
-    const Napi::String printerNameV8Str = printerName.ToString();
 
-    HANDLE handle = NULL;
+bool WindowsPrinter::Print(const std::string& filePath, const PdfiumOption& options) {
+    if (!printer_dc) {
+        return false;
+    }
 
-    ::OpenPrinterA(const_cast<LPSTR>(printerNameV8Str.Utf8Value().c_str()), &handle, NULL);
+    try {
+        auto filePathW = std::wstring(filePath.begin(), filePath.end());
+        auto doc = std::make_unique<PDFDocument>(std::move(filePathW));
 
-    Unique_HPrinter printerH(handle);
+        if (!doc->LoadDocument()) {
+            return false;
+        }
 
-    return printerH;
+        doc->PrintDocument(printer_dc, options);
+        return true;
+    }
+    catch (...) {
+        return false;
+    }
 }
+
 } 

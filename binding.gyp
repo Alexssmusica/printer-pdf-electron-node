@@ -14,8 +14,8 @@
             },
             "sources": [
                 "src/pdfium.cc",
-                "src/pdfium_imp.cc",
-                "src/pdfium_option.cc"
+                "src/pdfium_option.cc",
+                "src/pdfium_imp.cc"
             ],
             "include_dirs": [
                 "<!@(node -p \"require('node-addon-api').include\")",

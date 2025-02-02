@@ -2,42 +2,78 @@
 
 namespace printer_pdf_node_electron {
 
-Unique_PrinterContext GetPrinterContext(const Napi::Value& printerName) {
-    const Napi::String printerNameV8Str = printerName.ToString();
-    std::string printerNameStr = printerNameV8Str.Utf8Value();
-
-    cups_dest_t* dest = nullptr;
-    int num_dests = cupsGetDest(printerNameStr.c_str(), nullptr, 1, &dest);
-    
-    if (num_dests == 0 || !dest) {
-        return nullptr;
+LinuxPrinter::~LinuxPrinter() {
+    if (printer_dest) {
+        cupsFreeDests(1, printer_dest);
     }
-
-    // Create a context with printer options
-    int num_options = 0;
-    cups_option_t* options = nullptr;
-
-    // Add default options
-    num_options = cupsAddOption("media", "A4", num_options, &options);
-    num_options = cupsAddOption("fit-to-page", "true", num_options, &options);
-
-    // Free the destination since we don't need it anymore
-    cupsFreeDests(1, dest);
-
-    // Return the options context
-    return Unique_PrinterContext(reinterpret_cast<void*>(static_cast<intptr_t>(num_options)));
+    CleanupOptions();
 }
 
-bool PrintPDFToCups(const std::string& printerName, const std::string& filePath, void* ctx) {
-    int num_options = static_cast<int>(reinterpret_cast<intptr_t>(ctx));
-    cups_option_t* options = nullptr;
+void LinuxPrinter::CleanupOptions() {
+    if (options) {
+        cupsFreeOptions(num_options, options);
+        options = nullptr;
+        num_options = 0;
+    }
+}
+
+bool LinuxPrinter::Initialize(const Napi::Value& printerName) {
+    const Napi::String printerNameV8Str = printerName.ToString();
+    printer_name = printerNameV8Str.Utf8Value();
+
+    // Get printer destination
+    int num_dests = cupsGetDest(printer_name.c_str(), nullptr, 1, &printer_dest);
+    if (num_dests == 0 || !printer_dest) {
+        return false;
+    }
+
+    return true;
+}
+
+bool LinuxPrinter::Print(const std::string& filePath, const PdfiumOption& options) {
+    // Cleanup any existing options
+    CleanupOptions();
+
+    // Set up print options
+    num_options = 0;
+    
+    // Add media size based on paperSize
+    switch (options.paperSize) {
+        case PaperSize::A4:
+            num_options = cupsAddOption("media", "A4", num_options, &this->options);
+            break;
+        case PaperSize::LETTER:
+            num_options = cupsAddOption("media", "Letter", num_options, &this->options);
+            break;
+        case PaperSize::LEGAL:
+            num_options = cupsAddOption("media", "Legal", num_options, &this->options);
+            break;
+        case PaperSize::A3:
+            num_options = cupsAddOption("media", "A3", num_options, &this->options);
+            break;
+        default:
+            // For custom size, we'll use A4 as default
+            num_options = cupsAddOption("media", "A4", num_options, &this->options);
+            break;
+    }
+
+    // Set fit-to-page option
+    if (options.fitToPage) {
+        num_options = cupsAddOption("fit-to-page", "true", num_options, &this->options);
+    }
+
+    // Set number of copies
+    if (options.copies > 1) {
+        num_options = cupsAddOption("copies", std::to_string(options.copies).c_str(), 
+                                  num_options, &this->options);
+    }
 
     // Create the print job
-    int job_id = cupsPrintFile(printerName.c_str(), 
+    int job_id = cupsPrintFile(printer_name.c_str(), 
                              filePath.c_str(),
                              "PDF Document",
                              num_options, 
-                             options);
+                             this->options);
 
     return job_id != 0;
 }

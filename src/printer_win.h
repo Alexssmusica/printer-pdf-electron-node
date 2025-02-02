@@ -2,6 +2,7 @@
 #define PRINTER_WIN
 
 #include "inc.h"
+#include "printer_interface.h"
 
 namespace printer_pdf_node_electron {
     struct DCDeleter {
