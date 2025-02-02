@@ -24,19 +24,8 @@ private:
     HDC printer_dc = nullptr;
 };
 #else
-class LinuxPrinter : public PrinterInterface {
-public:
-    LinuxPrinter() = default;
-    ~LinuxPrinter();
-    bool Initialize(const Napi::Value& printerName) override;
-    bool Print(const std::string& filePath, const PdfiumOption& options) override;
-private:
-    std::string printer_name;
-    cups_dest_t* printer_dest = nullptr;
-    int num_options = 0;
-    cups_option_t* options = nullptr;
-    void CleanupOptions();
-};
+// Forward declaration for Linux
+class LinuxPrinter;
 #endif
 
 #ifdef _WIN32

@@ -5,6 +5,7 @@ namespace printer_pdf_node_electron {
 LinuxPrinter::~LinuxPrinter() {
     if (printer_dest) {
         cupsFreeDests(1, printer_dest);
+        printer_dest = nullptr;
     }
     CleanupOptions();
 }
@@ -22,10 +23,24 @@ bool LinuxPrinter::Initialize(const Napi::Value& printerName) {
     printer_name = printerNameV8Str.Utf8Value();
 
     // Get printer destination
-    int num_dests = cupsGetDest(printer_name.c_str(), nullptr, 1, &printer_dest);
-    if (num_dests == 0 || !printer_dest) {
+    cups_dest_t* dests = nullptr;
+    int num_dests = cupsGetDests(&dests);
+    
+    // Find the specific printer
+    printer_dest = cupsGetDest(printer_name.c_str(), nullptr, num_dests, dests);
+    
+    if (!printer_dest) {
+        cupsFreeDests(num_dests, dests);
         return false;
     }
+
+    // Create a copy of the destination
+    cups_dest_t* dest_copy = new cups_dest_t;
+    memcpy(dest_copy, printer_dest, sizeof(cups_dest_t));
+    printer_dest = dest_copy;
+
+    // Free the original destinations list
+    cupsFreeDests(num_dests, dests);
 
     return true;
 }
