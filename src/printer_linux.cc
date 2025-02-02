@@ -93,4 +93,9 @@ bool LinuxPrinter::Print(const std::string& filePath, const PdfiumOption& option
     return job_id != 0;
 }
 
+// Factory function implementation for Linux
+std::unique_ptr<PrinterInterface> CreatePrinter() {
+    return std::unique_ptr<PrinterInterface>(new LinuxPrinter());
+}
+
 } 

@@ -34,4 +34,9 @@ bool WindowsPrinter::Print(const std::string& filePath, const PdfiumOption& opti
     }
 }
 
+// Factory function implementation for Windows
+std::unique_ptr<PrinterInterface> CreatePrinter() {
+    return std::unique_ptr<PrinterInterface>(new WindowsPrinter());
+}
+
 } 

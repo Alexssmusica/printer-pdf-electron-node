@@ -28,15 +28,8 @@ private:
 class LinuxPrinter;
 #endif
 
-#ifdef _WIN32
-inline std::unique_ptr<PrinterInterface> CreatePrinter() {
-    return std::make_unique<WindowsPrinter>();
-}
-#else
-inline std::unique_ptr<PrinterInterface> CreatePrinter() {
-    return std::make_unique<LinuxPrinter>();
-}
-#endif
+// Factory function declaration
+std::unique_ptr<PrinterInterface> CreatePrinter();
 
 }  // namespace printer_pdf_node_electron
 
