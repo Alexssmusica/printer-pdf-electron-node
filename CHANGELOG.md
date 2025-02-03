@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/Alexssmusica/printer-pdf-node-electron/compare/v1.1.2...v1.1.3) (2025-02-03)
+
+
+### Bug Fixes
+
+* nome de arquivo com acentos ([4df75e2](https://github.com/Alexssmusica/printer-pdf-node-electron/commit/4df75e26e966bcc3e7f2c88f735c740274219c03))
+
 ## [1.1.2](https://github.com/Alexssmusica/printer-pdf-node-electron/compare/v1.1.1...v1.1.2) (2025-02-03)
 
 
