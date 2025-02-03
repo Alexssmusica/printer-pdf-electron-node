@@ -1,6 +1,7 @@
 const { printPDF } = require('./');
 const path = require('path');
-const filePath = path.join(__dirname, 'file.pdf');
+// Usando Buffer para garantir a codificação correta do caminho
+const filePath = Buffer.from(path.join(__dirname, 'PréVenda.pdf')).toString();
 
 async function imprimirDocumento() {
     try {

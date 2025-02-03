@@ -66,11 +66,7 @@ function printPDF({
             });
             resolve('Print job created successfully');
         } catch (e) {
-            console.error(e, {
-                printerName: printerName,
-                filePath: filePath
-                
-            });
+            console.error(e);
             reject(e);
         }
     });

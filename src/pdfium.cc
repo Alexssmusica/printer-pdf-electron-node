@@ -1,3 +1,14 @@
+// Definir WIN32_LEAN_AND_MEAN para evitar inclusões desnecessárias do Windows
+#define WIN32_LEAN_AND_MEAN
+
+#ifdef _WIN32
+// Incluir Windows.h antes de qualquer outro header do Windows
+#include <windows.h>
+// Definir ordem específica de includes para evitar conflitos
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#endif
+
 #include "inc.h"
 #include "printer_interface.h"
 #include "pdfium_option.h"
@@ -79,9 +90,19 @@ namespace printer_pdf_node_electron
 
         std::unique_ptr<PdfiumOption> options(V8OptionToStruct(v8_options));
         auto filePathStr = filePath.As<Napi::String>();
+        
+        #ifdef _WIN32
+        // Converter UTF-8 para wide string no Windows
+        int wlen = MultiByteToWideChar(CP_UTF8, 0, filePathStr.Utf8Value().c_str(), -1, NULL, 0);
+        std::wstring wstr(wlen, 0);
+        MultiByteToWideChar(CP_UTF8, 0, filePathStr.Utf8Value().c_str(), -1, &wstr[0], wlen);
+        std::string convertedPath(wstr.begin(), wstr.end());
+        #else
+        std::string convertedPath = filePathStr.Utf8Value();
+        #endif
 
         try {
-            if (!printer->Print(filePathStr.Utf8Value(), *options)) {
+            if (!printer->Print(convertedPath, *options)) {
                 Napi::Error::New(env, "Failed to file path").ThrowAsJavaScriptException();
                 return;
             }
