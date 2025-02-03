@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/Alexssmusica/printer-pdf-node-electron/compare/v1.1.0...v1.1.1) (2025-02-03)
+
+
+### Bug Fixes
+
+* imprimir quando impressora compartilhada windows ([3f1e7f5](https://github.com/Alexssmusica/printer-pdf-node-electron/commit/3f1e7f5c23daf57143ff944bbdeedd4dd031c8df))
+
 # [1.1.0](https://github.com/Alexssmusica/printer-pdf-node-electron/compare/v1.0.0...v1.1.0) (2025-02-02)
 
 
