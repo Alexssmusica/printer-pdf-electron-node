@@ -54,7 +54,7 @@ function printPDF({
 
     return new Promise((resolve, reject) => {
         try {
-            printer.printPDF(printerName, filePath, {
+            printer.printPDF(normalizeString(printerName), normalizeString(filePath), {
                 pageList,
                 paperSize,
                 fitToPage,
@@ -70,6 +70,10 @@ function printPDF({
             reject(e);
         }
     });
+}
+
+function normalizeString(str) {
+    return String.raw`${str}`
 }
 
 module.exports = {
