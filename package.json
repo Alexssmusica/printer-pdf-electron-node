@@ -1,6 +1,6 @@
 {
   "name": "printer-pdf-electron-node",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "node bindings for printer pdf node and electron",
   "main": "index.js",
   "scripts": {

@@ -1,3 +1,10 @@
+## [1.1.6](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.1.5...v1.1.6) (2025-02-03)
+
+
+### Bug Fixes
+
+* nome arquivo ([19519a3](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/19519a3dffa0bbc652eb358d47f4d432570351be))
+
 ## [1.1.5](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.1.4...v1.1.5) (2025-02-03)
 
 
