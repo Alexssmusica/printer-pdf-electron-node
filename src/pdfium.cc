@@ -73,7 +73,7 @@ namespace printer_pdf_node_electron
 
         auto printer = CreatePrinter();
         if (!printer->Initialize(printerName)) {
-            Napi::Error::New(env, "Failed to initialize printer").ThrowAsJavaScriptException();
+            Napi::Error::New(env, "Failed to printer name").ThrowAsJavaScriptException();
             return;
         }
 
@@ -82,7 +82,7 @@ namespace printer_pdf_node_electron
 
         try {
             if (!printer->Print(filePathStr.Utf8Value(), *options)) {
-                Napi::Error::New(env, "Failed to print document").ThrowAsJavaScriptException();
+                Napi::Error::New(env, "Failed to file path").ThrowAsJavaScriptException();
                 return;
             }
         } catch (const std::exception &e) {
