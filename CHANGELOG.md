@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/Alexssmusica/printer-pdf-node-electron/compare/v1.1.1...v1.1.2) (2025-02-03)
+
+
+### Bug Fixes
+
+* imprirmir por nome ([f652138](https://github.com/Alexssmusica/printer-pdf-node-electron/commit/f6521380d35bc3eb5dc724697a8c46b817bc02b3))
+
 ## [1.1.1](https://github.com/Alexssmusica/printer-pdf-node-electron/compare/v1.1.0...v1.1.1) (2025-02-03)
 
 
