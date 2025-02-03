@@ -4,6 +4,7 @@
             "target_name": "printer_pdf_node_electron",
             "cflags!": [ "-fno-exceptions" ],
             "cflags_cc!": [ "-fno-exceptions" ],
+            "binding_name": "printer_pdf_node_electron",
             "xcode_settings": { 
                 "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
                 "CLANG_CXX_LIBRARY": "libc++",
