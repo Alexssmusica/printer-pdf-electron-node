@@ -20,16 +20,16 @@ const printer = require('bindings')('printer_pdf_electron_node');
  * @param {string} options.printerName - Name of the printer to use
  * @returns {Promise<string>} - Resolves when print job is created
  */
-async function printPDF({
+function printPDF({
     pageList = [],
-    paperSize = 'A4',
+    paperSize = 'A4',  
     margins = {
         top: 0,
         right: 0,
         bottom: 0,
         left: 0
     },
-    fitToPage = true,
+    fitToPage = true, 
     width = 0,
     height = 0,
     dpi = 300,
@@ -52,26 +52,24 @@ async function printPDF({
         left: margins.left * 72
     };
 
-    try {
-        await printer.printPDF(normalizeString(printerName), normalizeString(filePath), {
-            pageList,
-            paperSize,
-            fitToPage,
-            margins: pointMargins,
-            width,
-            height,
-            dpi,
-            copies,
-        });
-        return 'Print job created successfully';
-    } catch (e) {
-        console.error(e);
-
-    }
-}
-
-function normalizeString(str) {
-    return String.raw`${str}`
+    return new Promise((resolve, reject) => {
+        try {
+            printer.printPDF(printerName, filePath, {
+                pageList,
+                paperSize,
+                fitToPage,
+                margins: pointMargins,
+                width,
+                height,
+                dpi,
+                copies,
+            });
+            resolve('Print job created successfully');
+        } catch (e) {
+            console.error(e);
+            reject(e);
+        }
+    });
 }
 
 module.exports = {
