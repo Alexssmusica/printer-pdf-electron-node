@@ -1,6 +1,31 @@
 const printer = require('bindings')('printer_pdf_node_electron');
 
 /**
+ * Formata o nome da impressora de rede para o formato correto
+ * @param {string} printerName - Nome da impressora
+ * @returns {string} - Nome da impressora formatado
+ */
+function formatPrinterName(printerName) {
+    if (!printerName) return printerName;
+    
+    // Verifica se é uma impressora de rede (começa com \\)
+    if (printerName.startsWith('\\')) {
+        // Remove barras extras e espaços
+        const cleanPath = printerName.trim().replace(/^\\+/, '');
+        
+        // Separa o caminho em partes
+        const [serverName, ...printerParts] = cleanPath.split('\\');
+        
+        if (serverName && printerParts.length > 0) {
+            // Reconstrói o caminho com o formato correto
+            return `\\\\${serverName}\\${printerParts.join('\\')}`;
+        }
+    }
+    
+    return printerName;
+}
+
+/**
  * Print a PDF file
  * @param {Object} options - Print options
  * @param {Array<Array<number>>} options.pageList - List of page ranges to print, e.g. [[1,3], [5,7]] prints pages 1-3 and 5-7
@@ -43,7 +68,8 @@ function printPDF({
     if (!printerName) {
         throw new Error('printerName is required');
     }
-
+    // Formata o nome da impressora
+    const formattedPrinterName = formatPrinterName(printerName);
     // Convert margins from inches to points (1 inch = 72 points)
     const pointMargins = {
         top: margins.top * 72,
@@ -54,7 +80,7 @@ function printPDF({
 
     return new Promise((resolve, reject) => {
         try {
-            printer.printPDF(printerName, filePath, {
+            printer.printPDF(formattedPrinterName, filePath, {
                 pageList,
                 paperSize,
                 fitToPage,
@@ -66,6 +92,7 @@ function printPDF({
             });
             resolve('Print job created successfully');
         } catch (e) {
+            console.error(e);
             reject(e);
         }
     });

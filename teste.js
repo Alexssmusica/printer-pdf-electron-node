@@ -6,7 +6,7 @@ async function imprimirDocumento() {
     try {
         await printPDF({
             filePath: filePath,
-            printerName: 'HP508140D7C039'
+            printerName: String.raw`\\desktop-lj9a226\Hewlett-Packard HP LaserJet Pro MFP M125a`
         });
         console.log('Documento enviado para impressão');
     } catch (error) {
