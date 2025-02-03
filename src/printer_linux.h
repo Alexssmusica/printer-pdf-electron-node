@@ -5,7 +5,7 @@
 #include "printer_interface.h"
 #include <cups/cups.h>
 
-namespace printer_pdf_node_electron {
+namespace printer_pdf_electron_node {
 
 // Implementation of the forward-declared LinuxPrinter
 class LinuxPrinter : public PrinterInterface {
@@ -23,6 +23,6 @@ private:
     void CleanupOptions();
 };
 
-} // namespace printer_pdf_node_electron
+} // namespace printer_pdf_electron_node
 
 #endif 

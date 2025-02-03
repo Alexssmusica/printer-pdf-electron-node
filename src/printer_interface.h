@@ -4,7 +4,7 @@
 #include "inc.h"
 #include "pdfium_option.h"
 
-namespace printer_pdf_node_electron {
+namespace printer_pdf_electron_node {
 
 class PrinterInterface {
 public:
@@ -31,6 +31,6 @@ class LinuxPrinter;
 // Factory function declaration
 std::unique_ptr<PrinterInterface> CreatePrinter();
 
-}  // namespace printer_pdf_node_electron
+}  // namespace printer_pdf_electron_node
 
 #endif 

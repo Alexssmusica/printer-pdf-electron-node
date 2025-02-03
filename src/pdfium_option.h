@@ -3,7 +3,7 @@
 
 #include "inc.h"
 
-namespace printer_pdf_node_electron {
+namespace printer_pdf_electron_node {
     enum class PaperSize {
         A4,      // 210 x 297 mm
         LETTER,  // 216 x 279 mm

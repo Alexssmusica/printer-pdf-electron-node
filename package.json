@@ -1,5 +1,5 @@
 {
-  "name": "printer-pdf-node-electron",
+  "name": "printer-pdf-electron-node",
   "version": "1.1.4",
   "description": "node bindings for printer pdf node and electron",
   "main": "index.js",
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:Alexssmusica/printer-pdf-node-electron.git"
+    "url": "git@github.com:Alexssmusica/printer-pdf-electron-node.git"
   },
   "keywords": [
     "pdf",
@@ -23,22 +23,22 @@
   ],
   "author": {
     "name": "Alex Santos de Souza",
-    "url": "https://github.com/Alexssmusica/printer-pdf-node-electron/#readme",
+    "url": "https://github.com/Alexssmusica/printer-pdf-electron-node/#readme",
     "email": "alexssmusica@gmail.com"
   },
   "binary": {
-    "module_name": "printer_pdf_node_electron",
+    "module_name": "printer_pdf_electron_node",
     "module_path": "build/Release/",
-    "host": "https://github.com/Alexssmusica/printer-pdf-node-electron/releases/download/",
+    "host": "https://github.com/Alexssmusica/printer-pdf-electron-node/releases/download/",
     "remote_path": "v{version}"
   },
   "types": "index.d.ts",
   "gypfile": true,
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/Alexssmusica/printer-pdf-node-electron/issues"
+    "url": "https://github.com/Alexssmusica/printer-pdf-electron-node/issues"
   },
-  "homepage": "https://github.com/Alexssmusica/printer-pdf-node-electron#readme",
+  "homepage": "https://github.com/Alexssmusica/printer-pdf-electron-node#readme",
   "dependencies": {
     "bindings": "1.5.0",
     "dotenv": "16.4.7",

@@ -1,6 +1,6 @@
 #include "printer_linux.h"
 
-namespace printer_pdf_node_electron {
+namespace printer_pdf_electron_node {
 
 LinuxPrinter::~LinuxPrinter() {
     if (printer_dest) {

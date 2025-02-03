@@ -1,7 +1,7 @@
 #include "printer_interface.h"
 #include "pdfium_imp.h"
 
-namespace printer_pdf_node_electron
+namespace printer_pdf_electron_node
 {
 
 bool WindowsPrinter::Initialize(const Napi::Value& printerName) {

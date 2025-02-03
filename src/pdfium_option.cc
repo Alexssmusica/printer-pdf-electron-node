@@ -12,7 +12,7 @@
         ops->name = (obj).Get(#name).ToNumber().FloatValue();                                    \
     }
 
-namespace printer_pdf_node_electron
+namespace printer_pdf_electron_node
 {
 std::unique_ptr<PdfiumOption> V8OptionToStruct(const Napi::Value &options)
 {

@@ -1,4 +1,4 @@
-const printer = require('bindings')('printer_pdf_node_electron');
+const printer = require('bindings')('printer_pdf_electron_node');
 
 
 /**

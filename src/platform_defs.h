@@ -3,7 +3,7 @@
 
 #include "inc.h"
 
-namespace printer_pdf_node_electron {
+namespace printer_pdf_electron_node {
 
 #ifdef _WIN32
     using DeviceContext = HDC;
@@ -13,6 +13,6 @@ namespace printer_pdf_node_electron {
     using WideString = const wchar_t*;
 #endif
 
-} // namespace printer_pdf_node_electron
+} // namespace printer_pdf_electron_node
 
 #endif 

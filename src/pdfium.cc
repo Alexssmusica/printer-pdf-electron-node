@@ -20,7 +20,7 @@
         return;                                \
     }
 
-namespace printer_pdf_node_electron
+namespace printer_pdf_electron_node
 {
     bool checkString(const Napi::Value &arg, const std::string &name)
     {
@@ -121,5 +121,5 @@ namespace printer_pdf_node_electron
         return exports;
     }
 
-    NODE_API_MODULE(printer_pdf_node_electron, Init)
+    NODE_API_MODULE(printer_pdf_electron_node, Init)
 } 

@@ -1,4 +1,4 @@
-# printer-pdf-node-electron
+# printer-pdf-electron-node
 
 Uma biblioteca Node.js para impressão de arquivos PDF com suporte avançado a configurações de impressão. Funciona com Node.js e Electron.
 
@@ -24,13 +24,13 @@ Uma biblioteca Node.js para impressão de arquivos PDF com suporte avançado a c
 ## Instalação
 
 ```bash
-npm install printer-pdf-node-electron
+npm install printer-pdf-electron-node
 ```
 
 Para desenvolvimento:
 ```bash
-git clone https://github.com/Alexssmusica/printer-pdf-node-electron.git
-cd printer-pdf-node-electron
+git clone https://github.com/Alexssmusica/printer-pdf-electron-node.git
+cd printer-pdf-electron-node
 npm install
 npm run rebuild
 ```
@@ -40,7 +40,7 @@ npm run rebuild
 ### JavaScript
 
 ```javascript
-const { printPDF } = require('printer-pdf-node-electron');
+const { printPDF } = require('printer-pdf-electron-node');
 
 // Exemplo básico
 async function imprimirDocumento() {
@@ -88,7 +88,7 @@ async function imprimirDocumentoAvancado() {
 ### TypeScript
 
 ```typescript
-import { printPDF, PrintPDFOptions, PaperSize, Margins } from 'printer-pdf-node-electron';
+import { printPDF, PrintPDFOptions, PaperSize, Margins } from 'printer-pdf-electron-node';
 
 // Definindo as margens
 const margins: Margins = {

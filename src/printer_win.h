@@ -4,7 +4,7 @@
 #include "inc.h"
 #include "printer_interface.h"
 
-namespace printer_pdf_node_electron {
+namespace printer_pdf_electron_node {
     struct DCDeleter {
         inline void operator()(HDC dc) { ::DeleteDC(dc); }
     };

@@ -5,7 +5,7 @@
 #include "pdfium_option.h"
 #include "platform_defs.h"
 
-namespace printer_pdf_node_electron
+namespace printer_pdf_electron_node
 {
 
 #ifdef _WIN32
