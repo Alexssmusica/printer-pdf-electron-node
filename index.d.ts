@@ -44,7 +44,7 @@ export interface PrintPDFOptions {
     /** Name of the printer to use */
     printerName: string;
 }
-declare module 'printer-pdf-node-electron' {
+declare module 'printer-pdf-electron-node' {
 
     /**
      * Prints a PDF file with the specified options
@@ -54,4 +54,4 @@ declare module 'printer-pdf-node-electron' {
     function printPDF(options: PrintPDFOptions): Promise<string>;
 }
 
-export default 'printer-pdf-node-electron';
+export default 'printer-pdf-electron-node';
