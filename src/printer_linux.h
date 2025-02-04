@@ -12,7 +12,7 @@ class LinuxPrinter : public PrinterInterface {
 public:
     LinuxPrinter() = default;
     ~LinuxPrinter();
-    bool Initialize(const Napi::Value& printerName) override;
+    std::string Initialize(const Napi::Value& printerName) override;
     bool Print(const std::string& filePath, const PdfiumOption& options) override;
 
 private:
