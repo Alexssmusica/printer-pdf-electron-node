@@ -2,6 +2,7 @@
 #include <napi.h>
 #include <cups/cups.h>
 #include <cstring>
+
 namespace printer_pdf_electron_node {
 
 LinuxPrinter::~LinuxPrinter() {

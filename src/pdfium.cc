@@ -1,14 +1,10 @@
-// Definir WIN32_LEAN_AND_MEAN para evitar inclusões desnecessárias do Windows
 #define WIN32_LEAN_AND_MEAN
-
 #ifdef _WIN32
-// Incluir Windows.h antes de qualquer outro header do Windows
 #include <windows.h>
-// Definir ordem específica de includes para evitar conflitos
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #endif
-#include <iostream> 
+#include <iostream>
 #include "inc.h"
 #include "printer_interface.h"
 #include "pdfium_option.h"
@@ -83,33 +79,38 @@ namespace printer_pdf_electron_node
         CHECK_STRING(filePath)
 
         auto printer = CreatePrinter();
-        
+
         // Verifica se há erro na inicialização
         std::string errorMessage = printer->Initialize(printerName);
-        if (!errorMessage.empty()) {
+        if (!errorMessage.empty())
+        {
             Napi::Error::New(env, errorMessage).ThrowAsJavaScriptException();
             return;
         }
 
         std::unique_ptr<PdfiumOption> options(V8OptionToStruct(v8_options));
         auto filePathStr = filePath.As<Napi::String>();
-        
-        #ifdef _WIN32
+
+#ifdef _WIN32
         // Converter UTF-8 para wide string no Windows
         int wlen = MultiByteToWideChar(CP_UTF8, 0, filePathStr.Utf8Value().c_str(), -1, NULL, 0);
         std::wstring wstr(wlen, 0);
         MultiByteToWideChar(CP_UTF8, 0, filePathStr.Utf8Value().c_str(), -1, &wstr[0], wlen);
         std::string convertedPath(wstr.begin(), wstr.end());
-        #else
+#else
         std::string convertedPath = filePathStr.Utf8Value();
-        #endif
+#endif
 
-        try {
-            if (!printer->Print(convertedPath, *options)) {
+        try
+        {
+            if (!printer->Print(convertedPath, *options))
+            {
                 Napi::Error::New(env, "Failed to file path").ThrowAsJavaScriptException();
                 return;
             }
-        } catch (const std::exception &e) {
+        }
+        catch (const std::exception &e)
+        {
             std::string basicErrInfo("Failed to print document: ");
             Napi::Error::New(env, basicErrInfo + e.what()).ThrowAsJavaScriptException();
             return;
@@ -125,4 +126,4 @@ namespace printer_pdf_electron_node
     }
 
     NODE_API_MODULE(printer_pdf_electron_node, Init)
-} 
+}

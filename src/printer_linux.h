@@ -1,6 +1,5 @@
 #ifndef PRINTER_LINUX
 #define PRINTER_LINUX
-
 #include "inc.h"
 #include "printer_interface.h"
 #include <cups/cups.h>

@@ -1,6 +1,5 @@
 const printer = require('bindings')('printer_pdf_electron_node');
 
-
 /**
  * Print a PDF file
  * @param {Object} options - Print options
@@ -38,14 +37,12 @@ async function printPDF({
     filePath,
     printerName,
 }) {
-    // Validate required parameters
     if (!filePath) {
         throw new Error('filePath is required');
     }
     if (!printerName) {
         throw new Error('printerName is required');
     }
-
     const pointMargins = {
         top: margins.top * 72,
         right: margins.right * 72,
