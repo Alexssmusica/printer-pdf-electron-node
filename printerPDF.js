@@ -65,7 +65,7 @@ async function printPDF({
             copies,
         });
     } catch (e) {
-        throw new Error(e);
+        throw e;
     }
 }
 

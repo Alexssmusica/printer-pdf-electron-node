@@ -74,7 +74,6 @@ void PDFDocument::PrintDocument(DeviceContext dc, const PdfiumOption &options) {
             }
         }
     }
-     DeleteDC(dc);
 }
 
 
