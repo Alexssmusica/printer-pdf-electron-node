@@ -51,7 +51,7 @@ declare module 'printer-pdf-electron-node' {
      * @param options - Print configuration options
      * @returns A promise that resolves when the print job is created
      */
-    function printPDF(options: PrintPDFOptions): Promise<string>;
+    function printPDF(options: PrintPDFOptions): Promise<void>;
 }
 
 export default 'printer-pdf-electron-node';

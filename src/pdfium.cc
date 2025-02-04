@@ -8,7 +8,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #endif
-
+#include <iostream> 
 #include "inc.h"
 #include "printer_interface.h"
 #include "pdfium_option.h"
@@ -83,8 +83,11 @@ namespace printer_pdf_electron_node
         CHECK_STRING(filePath)
 
         auto printer = CreatePrinter();
-        if (!printer->Initialize(printerName)) {
-            Napi::Error::New(env, "Failed to printer name").ThrowAsJavaScriptException();
+        
+        // Verifica se há erro na inicialização
+        std::string errorMessage = printer->Initialize(printerName);
+        if (!errorMessage.empty()) {
+            Napi::Error::New(env, errorMessage).ThrowAsJavaScriptException();
             return;
         }
 

@@ -2,72 +2,88 @@
 #include <clocale>
 #include <cstdlib>
 #include <algorithm>
-
+#include <iostream>
+#include <windows.h>
+#include <winspool.h>
 using namespace std;
 
 namespace printer_pdf_electron_node {
 
 #ifdef _WIN32
 
-PDFDocument::PDFDocument(std::wstring &&f) : filename(f)
-{
+PrinterDocumentJob::PrinterDocumentJob(DeviceContext dc, const std::wstring& filename)
+    : dc_(dc), filename_(filename), jobId_(0), cancelled_(false) {
+    DOCINFOW di = {0};
+    di.cbSize = sizeof(DOCINFOW);
+    di.lpszDocName = filename_.c_str();
+    di.lpszOutput = nullptr;
+    di.lpszDatatype = L"RAW";
+    di.fwType = 0;
+    jobId_ = ::StartDocW(dc_, &di);
+    if (jobId_ <= 0) cancelled_ = true;
 }
 
-bool PDFDocument::LoadDocument()
-{
-    std::ifstream pdfStream = std::ifstream(std::string(filename.begin(), filename.end()), 
-                                          std::ifstream::binary | std::ifstream::in);
-    file_content.insert(file_content.end(), std::istreambuf_iterator<char>(pdfStream), std::istreambuf_iterator<char>());
-    auto pdf_pointer = FPDF_LoadMemDocument(file_content.data(), (int)file_content.size(), nullptr);
+bool PrinterDocumentJob::Start() {
+    return jobId_ > 0;
+}
 
-    if (!pdf_pointer)
-    {
-        return false;
-    }
+bool PrinterDocumentJob::IsCancelled() const {
+    return cancelled_;
+}
+
+PDFDocument::PDFDocument(std::wstring &&f) : filename(f) {}
+
+bool PDFDocument::LoadDocument() {
+    std::ifstream pdfStream(std::string(filename.begin(), filename.end()),
+                           std::ifstream::binary | std::ifstream::in);
+    file_content.insert(file_content.end(), 
+                       std::istreambuf_iterator<char>(pdfStream), 
+                       std::istreambuf_iterator<char>());
+    auto pdf_pointer = FPDF_LoadMemDocument(file_content.data(), (int)file_content.size(), nullptr);
+    if (!pdf_pointer) return false;
     doc.reset(pdf_pointer);
     return true;
 }
 
-void PDFDocument::PrintDocument(DeviceContext dc, const PdfiumOption &options)
-{
-    PrinterDocumentJob djob(dc, filename.c_str());
+void PDFDocument::PrintDocument(DeviceContext dc, const PdfiumOption &options) {
+    PrinterDocumentJob djob(dc, filename);
+    if (!djob.Start()) {
+        return;
+    }
 
     auto pageCount = FPDF_GetPageCount(doc.get());
-
     auto width = options.width;
     auto height = options.height;
 
-    for (int16_t i = 0; i < options.copies; ++i)
-    {
-        if (std::size(options.page_list) > 0)
-        {
-            for (auto pair : options.page_list)
-            {
-                for (auto j = pair.first; j < pair.second + 1; ++j)
-                {
+    for (int16_t i = 0; i < options.copies; ++i) {
+        if (std::size(options.page_list) > 0) {
+            for (auto pair : options.page_list) {
+                for (auto j = pair.first; j < pair.second + 1; ++j) {
+                    if (djob.IsCancelled()) {
+                        return;
+                    }
                     printPage(dc, j, width, height, options.dpi, options);
                 }
             }
-        }
-        else
-        {
-            for (auto j = 0; j < pageCount; j++)
-            {
+        } else {
+            for (auto j = 0; j < pageCount; j++) {
+                if (djob.IsCancelled()) {
+                    return;
+                }
                 printPage(dc, j, width, height, options.dpi, options);
             }
         }
     }
+     DeleteDC(dc);
 }
 
+
 void PDFDocument::printPage(DeviceContext dc,
-                                         int32_t index, int32_t width, int32_t height, float dpiRatio,
-                                         const PdfiumOption &options)
-{
+                            int32_t index, int32_t width, int32_t height, float dpiRatio,
+                            const PdfiumOption &options) {
     PrinterPageJob pJob(dc);
     auto page = getPage(doc.get(), index);
-
-    if (!page)
-    {
+    if (!page) {
         return;
     }
 
@@ -92,13 +108,11 @@ void PDFDocument::printPage(DeviceContext dc,
     int effectivePrintableHeight = printableHeight - (marginTop + marginBottom);
 
     // If no width/height specified, get from PDF page
-    if (!width)
-    {
+    if (!width) {
         auto pageWidth = FPDF_GetPageWidth(page);
         width = static_cast<int32_t>(pageWidth * dpiRatio);
     }
-    if (!height)
-    {
+    if (!height) {
         auto pageHeight = FPDF_GetPageHeight(page);
         height = static_cast<int32_t>(pageHeight * dpiRatio);
     }
@@ -119,9 +133,7 @@ void PDFDocument::printPage(DeviceContext dc,
 
     float scale;
     int32_t x, y;
-
-    if (options.fitToPage)
-    {
+    if (options.fitToPage) {
         // Calculate scaling to fit page while maintaining aspect ratio
         float scaleX = static_cast<float>(effectivePrintableWidth) / width;
         float scaleY = static_cast<float>(effectivePrintableHeight) / height;
@@ -130,37 +142,33 @@ void PDFDocument::printPage(DeviceContext dc,
         // Calculate centered position within the effective printable area
         x = marginLeft + (effectivePrintableWidth - static_cast<int32_t>(width * scale)) / 2;
         y = marginTop + (effectivePrintableHeight - static_cast<int32_t>(height * scale)) / 2;
-    }
-    else
-    {
+    } else {
         // Use actual size (1:1 scale)
         scale = 1.0f;
-        
+
         // Center the content in the available space
         x = marginLeft + (effectivePrintableWidth - width) / 2;
         y = marginTop + (effectivePrintableHeight - height) / 2;
 
         // If content is larger than printable area, align to top-left corner
-        if (width > effectivePrintableWidth || height > effectivePrintableHeight)
-        {
+        if (width > effectivePrintableWidth || height > effectivePrintableHeight) {
             x = marginLeft;
             y = marginTop;
         }
     }
 
     // Render the PDF page
-    ::FPDF_RenderPage(dc,  // DC handle
-                     page,  // page handle
-                     x,  // start x
-                     y,  // start y
-                     static_cast<int32_t>(width * scale),  // size x
-                     static_cast<int32_t>(height * scale),  // size y
-                     0,  // rotate
-                     FPDF_ANNOT | FPDF_PRINTING);  // flags
+    ::FPDF_RenderPage(dc, // DC handle
+                      page, // page handle
+                      x, // start x
+                      y, // start y
+                      static_cast<int32_t>(width * scale), // size x
+                      static_cast<int32_t>(height * scale), // size y
+                      0, // rotate
+                      FPDF_ANNOT | FPDF_PRINTING); // flags
 }
 
-FPDF_PAGE PDFDocument::getPage(const FPDF_DOCUMENT &doc, int32_t index)
-{
+FPDF_PAGE PDFDocument::getPage(const FPDF_DOCUMENT &doc, int32_t index) {
     auto iter = loaded_pages.find(index);
     if (iter != loaded_pages.end())
         return iter->second.get();
@@ -177,4 +185,4 @@ FPDF_PAGE PDFDocument::getPage(const FPDF_DOCUMENT &doc, int32_t index)
 
 #endif
 
-} 
+}

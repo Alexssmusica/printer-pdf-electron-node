@@ -7,7 +7,7 @@ async function imprimirDocumento() {
     try {
         await printPDF({
             filePath: filePath,
-            printerName: 'HP508140D7C039(HP Laser MFP 131 133 135-138)'
+            printerName: 'ELGIN L42Pro U'
         });
         console.log('Documento enviado para impressão');
     } catch (error) {

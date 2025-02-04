@@ -29,21 +29,15 @@ private:
 class PrinterDocumentJob
 {
 public:
-  PrinterDocumentJob(DeviceContext d, WideString filename) : dc(d)
-  {
-    ::DOCINFOW docInfo{sizeof(docInfo), const_cast<LPWSTR>(filename), NULL, NULL, 0};
-    job = ::StartDocW(dc, &docInfo);
-    if (job <= 0)
-      throw;
-  };
-  ~PrinterDocumentJob()
-  {
-    ::EndDoc(dc);
-  };
+  PrinterDocumentJob(DeviceContext dc, const std::wstring& filename);
+  bool Start();
+  bool IsCancelled() const;
 
 private:
-  DeviceContext dc;
-  int job;
+  DeviceContext dc_;
+  std::wstring filename_;
+  DWORD jobId_;
+  bool cancelled_;
 };
 
 class PrinterPageJob

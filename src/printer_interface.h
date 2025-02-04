@@ -9,7 +9,7 @@ namespace printer_pdf_electron_node {
 class PrinterInterface {
 public:
     virtual ~PrinterInterface() = default;
-    virtual bool Initialize(const Napi::Value& printerName) = 0;
+    virtual std::string Initialize(const Napi::Value& printerName) = 0;
     virtual bool Print(const std::string& filePath, const PdfiumOption& options) = 0;
 };
 
@@ -18,7 +18,7 @@ class WindowsPrinter : public PrinterInterface {
 public:
     WindowsPrinter() = default;
     ~WindowsPrinter() = default;
-    bool Initialize(const Napi::Value& printerName) override;
+    std::string Initialize(const Napi::Value& printerName) override;
     bool Print(const std::string& filePath, const PdfiumOption& options) override;
 private:
     HDC printer_dc = nullptr;

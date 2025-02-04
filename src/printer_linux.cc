@@ -1,5 +1,7 @@
 #include "printer_linux.h"
-
+#include <napi.h>
+#include <cups/cups.h>
+#include <cstring>
 namespace printer_pdf_electron_node {
 
 LinuxPrinter::~LinuxPrinter() {
@@ -18,31 +20,53 @@ void LinuxPrinter::CleanupOptions() {
     }
 }
 
-bool LinuxPrinter::Initialize(const Napi::Value& printerName) {
-    const Napi::String printerNameV8Str = printerName.ToString();
+std::string LinuxPrinter::Initialize(const Napi::Value& printerName) {
+    // Converte o valor recebido para string do Napi::Value
+    Napi::String printerNameV8Str = printerName.ToString();
     printer_name = printerNameV8Str.Utf8Value();
 
-    // Get printer destination
+    // Obter destinos de impressoras
     cups_dest_t* dests = nullptr;
     int num_dests = cupsGetDests(&dests);
-    
-    // Find the specific printer
-    printer_dest = cupsGetDest(printer_name.c_str(), nullptr, num_dests, dests);
-    
-    if (!printer_dest) {
-        cupsFreeDests(num_dests, dests);
-        return false;
+
+    if (num_dests == 0) {
+        return "Nenhuma impressora encontrada.";
     }
 
-    // Create a copy of the destination
+    // Encontrar a impressora específica
+    printer_dest = cupsGetDest(printer_name.c_str(), nullptr, num_dests, dests);
+    if (!printer_dest) {
+        cupsFreeDests(num_dests, dests);
+        return "Impressora não encontrada: " + printer_name;
+    }
+
+    // Criar uma cópia do destino
     cups_dest_t* dest_copy = new cups_dest_t;
     memcpy(dest_copy, printer_dest, sizeof(cups_dest_t));
     printer_dest = dest_copy;
 
-    // Free the original destinations list
+    // Liberar a lista original de destinos
     cupsFreeDests(num_dests, dests);
 
-    return true;
+    // Verificação adicional: tentar obter informações sobre a impressora
+    http_t* http = httpConnectEncrypt(cupsServer(), ippPort(), HTTP_ENCRYPT_IF_REQUESTED);
+    if (!http) {
+        return "Falha ao conectar ao servidor CUPS.";
+    }
+
+    ipp_t* request = ippNewRequest(CUPS_GET_PRINTERS);
+    ippAddString(request, IPP_TAG_OPERATION, IPP_TAG_URI, "printer-uri", nullptr, printer_name.c_str());
+
+    ipp_t* response = cupsDoRequest(http, request, "/");
+    if (!response) {
+        httpClose(http);
+        return "Falha ao obter informações da impressora: " + printer_name;
+    }
+
+    ippDelete(response);
+    httpClose(http);
+
+    return ""; // Retorna string vazia em caso de sucesso
 }
 
 bool LinuxPrinter::Print(const std::string& filePath, const PdfiumOption& options) {
