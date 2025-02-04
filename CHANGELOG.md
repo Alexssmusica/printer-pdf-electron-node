@@ -1,3 +1,20 @@
+## [1.1.10](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.1.9...v1.1.10) (2025-02-04)
+
+
+### Bug Fixes
+
+* erro impresora ([5fec857](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/5fec85742f1c18a70ea60126335686510a501a68))
+* erro linux ([f12e29e](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/f12e29e0b15d3cf7b7aa9b27fffe404124e25ae5))
+* erro tipo de arquivo ([2a3fefb](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/2a3fefb9f84a7a4d43f21bec8ca38fae2db4eb5f))
+* melhor tratamento de erro ([ae60d09](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/ae60d09ad711939be9f5a112e64016811bb0f51e))
+* teste ([ae8d1e5](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/ae8d1e593d2d1138cb9ca00ff78c4a25ad38c02e))
+* warning linux ([a67a8a6](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/a67a8a6379c7f2d8d07b5bcc785becada00946af))
+
+
+### Reverts
+
+* Revert "fix :alterado promise para async" ([888cf3c](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/888cf3c37fe3c78193c4d505dd4697b4312f2242))
+
 ## [1.1.9](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.1.8...v1.1.9) (2025-02-03)
 
 
