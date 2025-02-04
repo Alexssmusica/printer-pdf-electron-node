@@ -49,7 +49,13 @@ std::string LinuxPrinter::Initialize(const Napi::Value& printerName) {
     cupsFreeDests(num_dests, dests);
 
     // Verificação adicional: tentar obter informações sobre a impressora
-    http_t* http = httpConnectEncrypt(cupsServer(), ippPort(), HTTP_ENCRYPT_IF_REQUESTED);
+    http_t* http = httpConnect2(cupsServer(), ippPort(), 
+                              nullptr,      // addrlist
+                              AF_UNSPEC,    // family
+                              HTTP_ENCRYPTION_IF_REQUESTED,
+                              1,            // blocking
+                              30000,        // timeout (ms)
+                              nullptr);     // cancel
     if (!http) {
         return "Falha ao conectar ao servidor CUPS.";
     }
