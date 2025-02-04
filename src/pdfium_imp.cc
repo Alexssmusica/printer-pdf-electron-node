@@ -13,14 +13,28 @@ namespace printer_pdf_electron_node {
 
 PrinterDocumentJob::PrinterDocumentJob(DeviceContext dc, const std::wstring& filename)
     : dc_(dc), filename_(filename), jobId_(0), cancelled_(false) {
+    
+    // Inicializar DOCINFOW corretamente
     DOCINFOW di = {0};
     di.cbSize = sizeof(DOCINFOW);
     di.lpszDocName = filename_.c_str();
     di.lpszOutput = nullptr;
-    di.lpszDatatype = L"RAW";
+    di.lpszDatatype = nullptr;  // Alterado de L"RAW" para nullptr
     di.fwType = 0;
+    
+    // Iniciar o documento
     jobId_ = ::StartDocW(dc_, &di);
-    if (jobId_ <= 0) cancelled_ = true;
+    if (jobId_ <= 0) {
+        cancelled_ = true;
+        DWORD error = GetLastError();
+        // Log do erro se necessário
+    }
+}
+
+PrinterDocumentJob::~PrinterDocumentJob() {
+    if (jobId_ > 0) {
+        ::EndDoc(dc_);
+    }
 }
 
 bool PrinterDocumentJob::Start() {
@@ -48,6 +62,7 @@ bool PDFDocument::LoadDocument() {
 void PDFDocument::PrintDocument(DeviceContext dc, const PdfiumOption &options) {
     PrinterDocumentJob djob(dc, filename);
     if (!djob.Start()) {
+        std::cerr << "Falha ao iniciar o trabalho de impressão. Erro: " << GetLastError() << std::endl;
         return;
     }
 
@@ -78,13 +93,18 @@ void PDFDocument::PrintDocument(DeviceContext dc, const PdfiumOption &options) {
 
 
 void PDFDocument::printPage(DeviceContext dc,
-                            int32_t index, int32_t width, int32_t height, float dpiRatio,
-                            const PdfiumOption &options) {
+                          int32_t index, int32_t width, int32_t height, float dpiRatio,
+                          const PdfiumOption &options) {
     PrinterPageJob pJob(dc);
     auto page = getPage(doc.get(), index);
     if (!page) {
         return;
     }
+
+    // Garantir que estamos no modo correto
+    SetGraphicsMode(dc, GM_ADVANCED);
+    SetMapMode(dc, MM_TEXT);
+    SetBkMode(dc, TRANSPARENT);
 
     // Get physical page dimensions
     int physicalWidth = GetDeviceCaps(dc, PHYSICALWIDTH);
@@ -120,12 +140,6 @@ void PDFDocument::printPage(DeviceContext dc,
     HRGN rgn = CreateRectRgn(0, 0, printableWidth, printableHeight);
     SelectClipRgn(dc, rgn);
     DeleteObject(rgn);
-
-    // Set up the DC for printing
-    SetMapMode(dc, MM_TEXT);
-    SetBkMode(dc, TRANSPARENT);
-    SelectObject(dc, GetStockObject(NULL_PEN));
-    SelectObject(dc, GetStockObject(WHITE_BRUSH));
 
     // Clear the background
     Rectangle(dc, -physicalOffsetX, -physicalOffsetY, physicalWidth, physicalHeight);
@@ -165,6 +179,9 @@ void PDFDocument::printPage(DeviceContext dc,
                       static_cast<int32_t>(height * scale), // size y
                       0, // rotate
                       FPDF_ANNOT | FPDF_PRINTING); // flags
+
+    // Após renderizar a página
+    GdiFlush();
 }
 
 FPDF_PAGE PDFDocument::getPage(const FPDF_DOCUMENT &doc, int32_t index) {

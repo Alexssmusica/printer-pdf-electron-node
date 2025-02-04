@@ -17,7 +17,12 @@ public:
 class WindowsPrinter : public PrinterInterface {
 public:
     WindowsPrinter() = default;
-    ~WindowsPrinter() = default;
+    ~WindowsPrinter() {
+        if (printer_dc) {
+            DeleteDC(printer_dc);
+            printer_dc = nullptr;
+        }
+    }
     std::string Initialize(const Napi::Value& printerName) override;
     bool Print(const std::string& filePath, const PdfiumOption& options) override;
 private:

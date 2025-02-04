@@ -90,7 +90,41 @@ std::string WindowsPrinter::Initialize(const Napi::Value& printerName) {
         return std::string(errorMessage.begin(), errorMessage.end());
     }
 
-   
+    // Configurar o DC para impressão
+    if (printer_dc != NULL) {
+        // Configurar o modo de mapeamento
+        SetMapMode(printer_dc, MM_TEXT);
+        
+        // Configurar a orientação padrão e qualidade
+        PRINTDLG pd = {0};
+        pd.lStructSize = sizeof(PRINTDLG);
+        pd.hDC = printer_dc;
+
+        // Configurar qualidade de impressão usando DeviceMode
+        DEVMODE* pDevMode = nullptr;
+        if (printer_dc) {
+            pDevMode = (DEVMODE*)GlobalLock(GlobalAlloc(GHND, sizeof(DEVMODE)));
+            if (pDevMode) {
+                pDevMode->dmSize = sizeof(DEVMODE);
+                pDevMode->dmFields = DM_PRINTQUALITY;
+                pDevMode->dmPrintQuality = DMRES_HIGH;  // Alta qualidade
+                
+                // Aplicar configurações
+                ResetDC(printer_dc, pDevMode);
+                
+                GlobalUnlock(pDevMode);
+                GlobalFree(pDevMode);
+            }
+        }
+        
+        // Verificar se as configurações foram aplicadas
+        if (GetDeviceCaps(printer_dc, RASTERCAPS) == 0) {
+            DeleteDC(printer_dc);
+            printer_dc = NULL;
+            return "Falha ao configurar o dispositivo de impressão";
+        }
+    }
+
     int caps = GetDeviceCaps(printer_dc, TECHNOLOGY);
     if (caps == 0) {
         DeleteDC(printer_dc);
@@ -104,6 +138,7 @@ bool WindowsPrinter::Print(const std::string& filePath, const PdfiumOption& opti
     if (!printer_dc) {
         return false;
     }
+
     try {
         auto filePathW = std::wstring(filePath.begin(), filePath.end());
         auto doc = std::make_unique<PDFDocument>(std::move(filePathW));
@@ -112,10 +147,21 @@ bool WindowsPrinter::Print(const std::string& filePath, const PdfiumOption& opti
             return false;
         }
 
+        // Configurar o DC antes da impressão
+        SetGraphicsMode(printer_dc, GM_ADVANCED);
+        SetMapMode(printer_dc, MM_TEXT);
+        
+        // Imprimir o documento
         doc->PrintDocument(printer_dc, options);
+        
+        // Garantir que tudo foi enviado para a impressora
+        GdiFlush();
+        
         return true;
     }
-    catch (...) {
+    catch (const std::exception& e) {
+        // Log do erro
+        std::cerr << "Erro durante a impressão: " << e.what() << std::endl;
         return false;
     }
 }

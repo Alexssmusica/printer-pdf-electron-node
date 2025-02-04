@@ -30,6 +30,7 @@ class PrinterDocumentJob
 {
 public:
   PrinterDocumentJob(DeviceContext dc, const std::wstring& filename);
+  ~PrinterDocumentJob();
   bool Start();
   bool IsCancelled() const;
 
