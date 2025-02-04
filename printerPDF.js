@@ -60,7 +60,6 @@ async function printPDF({
             margins: pointMargins,
             width,
             height,
-
             dpi,
             copies,
         });
