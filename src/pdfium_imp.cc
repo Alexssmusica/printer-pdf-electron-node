@@ -67,24 +67,36 @@ namespace printer_pdf_electron_node
 
     void PDFDocument::PrintDocument(DeviceContext dc, const PdfiumOption &options)
     {
-        PrinterDocumentJob djob(dc, filename);
-        if (!djob.Start())
-        {
-            std::cerr << "Falha ao iniciar o trabalho de impressão. Erro: " << GetLastError() << std::endl;
-            return;
-        }
+        try {
+            PrinterDocumentJob djob(dc, filename);
+            if (!djob.Start()) {
+                throw std::runtime_error("Failed to start print job. Error: " + 
+                    std::to_string(GetLastError()));
+            }
 
-        auto pageCount = FPDF_GetPageCount(doc.get());
-        auto width = options.width;
-        auto height = options.height;
+            auto pageCount = FPDF_GetPageCount(doc.get());
+            auto width = options.width;
+            auto height = options.height;
 
-        for (int16_t i = 0; i < options.copies; ++i)
-        {
-            if (std::size(options.page_list) > 0)
+            for (int16_t i = 0; i < options.copies; ++i)
             {
-                for (auto pair : options.page_list)
+                if (std::size(options.page_list) > 0)
                 {
-                    for (auto j = pair.first; j < pair.second + 1; ++j)
+                    for (auto pair : options.page_list)
+                    {
+                        for (auto j = pair.first; j < pair.second + 1; ++j)
+                        {
+                            if (djob.IsCancelled())
+                            {
+                                return;
+                            }
+                            printPage(dc, j, width, height, options.dpi, options);
+                        }
+                    }
+                }
+                else
+                {
+                    for (auto j = 0; j < pageCount; j++)
                     {
                         if (djob.IsCancelled())
                         {
@@ -94,17 +106,8 @@ namespace printer_pdf_electron_node
                     }
                 }
             }
-            else
-            {
-                for (auto j = 0; j < pageCount; j++)
-                {
-                    if (djob.IsCancelled())
-                    {
-                        return;
-                    }
-                    printPage(dc, j, width, height, options.dpi, options);
-                }
-            }
+        } catch (...) {
+            throw; // Simplesmente propaga a exceção
         }
     }
 
@@ -210,15 +213,19 @@ namespace printer_pdf_electron_node
 
     FPDF_PAGE PDFDocument::getPage(const FPDF_DOCUMENT &doc, int32_t index)
     {
+        if (!doc) {
+            throw std::runtime_error("Invalid document handle");
+        }
+
         auto iter = loaded_pages.find(index);
         if (iter != loaded_pages.end())
             return iter->second.get();
 
         ScopedFPDFPage page(FPDF_LoadPage(doc, index));
-        if (!page)
-            return nullptr;
+        if (!page) {
+            throw std::runtime_error("Failed to load page " + std::to_string(index));
+        }
 
-        // Mark the page as loaded first to prevent infinite recursion.
         FPDF_PAGE page_ptr = page.get();
         loaded_pages[index] = std::move(page);
         return page_ptr;

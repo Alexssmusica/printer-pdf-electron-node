@@ -71,48 +71,49 @@ namespace printer_pdf_electron_node
     void PrintPDF(const Napi::CallbackInfo &args)
     {
         Napi::Env env = args.Env();
-        const Napi::Value &printerName = args[0];
-        const Napi::Value &filePath = args[1];
-        const Napi::Value &v8_options = args[2];
+        try {
+            const Napi::Value &printerName = args[0];
+            const Napi::Value &filePath = args[1];
+            const Napi::Value &v8_options = args[2];
 
-        CHECK_STRING(printerName)
-        CHECK_STRING(filePath)
+            CHECK_STRING(printerName)
+            CHECK_STRING(filePath)
 
-        auto printer = CreatePrinter();
+            auto printer = CreatePrinter();
 
-        // Verifica se há erro na inicialização
-        std::string errorMessage = printer->Initialize(printerName);
-        if (!errorMessage.empty())
-        {
-            Napi::Error::New(env, errorMessage).ThrowAsJavaScriptException();
-            return;
-        }
+            // Verifica se há erro na inicialização
+            std::string errorMessage = printer->Initialize(printerName);
+            if (!errorMessage.empty())
+            {
+                Napi::Error::New(env, errorMessage).ThrowAsJavaScriptException();
+                return;
+            }
 
-        std::unique_ptr<PdfiumOption> options(V8OptionToStruct(v8_options));
-        auto filePathStr = filePath.As<Napi::String>();
+            std::unique_ptr<PdfiumOption> options(V8OptionToStruct(v8_options));
+            auto filePathStr = filePath.As<Napi::String>();
 
 #ifdef _WIN32
-        // Converter UTF-8 para wide string no Windows
-        int wlen = MultiByteToWideChar(CP_UTF8, 0, filePathStr.Utf8Value().c_str(), -1, NULL, 0);
-        std::wstring wstr(wlen, 0);
-        MultiByteToWideChar(CP_UTF8, 0, filePathStr.Utf8Value().c_str(), -1, &wstr[0], wlen);
-        std::string convertedPath(wstr.begin(), wstr.end());
+            // Converter UTF-8 para wide string no Windows
+            int wlen = MultiByteToWideChar(CP_UTF8, 0, filePathStr.Utf8Value().c_str(), -1, NULL, 0);
+            std::wstring wstr(wlen, 0);
+            MultiByteToWideChar(CP_UTF8, 0, filePathStr.Utf8Value().c_str(), -1, &wstr[0], wlen);
+            std::string convertedPath(wstr.begin(), wstr.end());
 #else
-        std::string convertedPath = filePathStr.Utf8Value();
+            std::string convertedPath = filePathStr.Utf8Value();
 #endif
 
-        try
-        {
             if (!printer->Print(convertedPath, *options))
             {
                 Napi::Error::New(env, "Failed to file path").ThrowAsJavaScriptException();
                 return;
             }
-        }
-        catch (const std::exception &e)
-        {
-            std::string basicErrInfo("Failed to print document: ");
-            Napi::Error::New(env, basicErrInfo + e.what()).ThrowAsJavaScriptException();
+        } catch (const std::exception &e) {
+            Napi::Error::New(env, std::string("PDF printing error: ") + e.what())
+                .ThrowAsJavaScriptException();
+            return;
+        } catch (...) {
+            Napi::Error::New(env, "Unknown error during PDF printing")
+                .ThrowAsJavaScriptException();
             return;
         }
     }
