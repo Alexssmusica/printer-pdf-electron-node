@@ -1,3 +1,12 @@
+## [1.2.3](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.2.2...v1.2.3) (2025-02-06)
+
+
+### Bug Fixes
+
+* deletar pastas ([b841dc1](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/b841dc18deb0b10bd7eed4b514a1e941f8ed28a1))
+* libs ([7d4291f](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/7d4291f65959c609076ab0963b2d109e59f220d5))
+* pre install ([94400ec](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/94400ec393636429f03fc4b461200d53691803c9))
+
 ## [1.2.2](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.2.1...v1.2.2) (2025-02-06)
 
 
