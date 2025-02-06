@@ -4,6 +4,7 @@
   "description": "node bindings for printer pdf node and electron",
   "main": "index.js",
   "scripts": {
+    "preinstall": "node install.js",
     "install": "node-gyp rebuild",
     "prebuild:dev": "node uploadBinarios.js",
     "prebuild:master": "prebuild",
@@ -33,7 +34,7 @@
     "remote_path": "v{version}"
   },
   "types": "index.d.ts",
-  "gypfile": true,
+  "gypfile": false,
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/Alexssmusica/printer-pdf-electron-node/issues"
