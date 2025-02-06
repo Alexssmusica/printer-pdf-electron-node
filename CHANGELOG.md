@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.2.5...v1.3.0) (2025-02-06)
+
+
+### Features
+
+* implement log error ([48d2c1f](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/48d2c1f830f5a2afdd9840bcadaa6992f6e1588d))
+
 ## [1.2.5](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.2.4...v1.2.5) (2025-02-06)
 
 
