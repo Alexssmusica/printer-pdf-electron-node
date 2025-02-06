@@ -1,5 +1,6 @@
 #include "printer_interface.h"
 #include "pdfium_imp.h"
+#include "utils.h"
 #include <iostream>
 #include <napi.h> // Supondo que você esteja usando o N-API no C++
 #include <string>
@@ -7,181 +8,195 @@
 namespace printer_pdf_electron_node
 {
 
-    std::string WindowsPrinter::Initialize(const Napi::Value &printerName)
-    {
-        Napi::String printerNameV8Str = printerName.ToString();
-        std::u16string u16Str = printerNameV8Str.Utf16Value();
-
-        // Converter corretamente para WCHAR*
-        std::wstring wPrinterName;
-        wPrinterName.resize(u16Str.length());
-        for (size_t i = 0; i < u16Str.length(); ++i)
-        {
-            wPrinterName[i] = static_cast<wchar_t>(u16Str[i]);
-        }
-
-        // Verificar o status da impressora
-        HANDLE hPrinter;
-        if (!OpenPrinterW(const_cast<LPWSTR>(wPrinterName.c_str()), &hPrinter, NULL))
-        {
-            DWORD errorCode = GetLastError();
-            return "Erro ao abrir a impressora.";
-        }
-
-        // Obter o tamanho necessário para o buffer de PRINTER_INFO_2
-        DWORD needed = 0;
-        GetPrinter(hPrinter, 2, NULL, 0, &needed);
-        if (needed == 0)
-        {
-            ClosePrinter(hPrinter);
-            return "Erro ao obter informações da impressora.";
-        }
-
-        // Alocar buffer e obter informações da impressora
-        PRINTER_INFO_2 *pi2 = (PRINTER_INFO_2 *)malloc(needed);
-        if (!GetPrinter(hPrinter, 2, (LPBYTE)pi2, needed, &needed))
-        {
-            DWORD errorCode = GetLastError();
-            free(pi2);
-            ClosePrinter(hPrinter);
-            return "Erro ao obter informações da impressora.";
-        }
-
-        // Verificar o status da impressora
-        if (pi2->Status & PRINTER_STATUS_ERROR)
-        {
-            free(pi2);
-            ClosePrinter(hPrinter);
-            return "A impressora está em estado de erro.";
-        }
-        if (pi2->Status & PRINTER_STATUS_OFFLINE)
-        {
-            free(pi2);
-            ClosePrinter(hPrinter);
-            return "A impressora está offline.";
-        }
-        if (pi2->Status & PRINTER_STATUS_PAPER_JAM)
-        {
-            free(pi2);
-            ClosePrinter(hPrinter);
-            return "A impressora está com atolamento de papel.";
-        }
-
-        // Liberar recursos
-        free(pi2);
-        ClosePrinter(hPrinter);
-
-        // Criar o contexto de impressão usando o nome convertido corretamente
-        printer_dc = CreateDCW(L"WINSPOOL", wPrinterName.c_str(), NULL, NULL);
-        if (printer_dc == NULL)
-        {
-            DWORD errorCode = GetLastError();
-            LPWSTR errorMsg = nullptr;
-            FormatMessageW(
-                FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                NULL,
-                errorCode,
-                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                (LPWSTR)&errorMsg,
-                0,
-                NULL);
-
-            std::wstring errorMessage;
-            if (errorMsg)
-            {
-                errorMessage = errorMsg;
-                LocalFree(errorMsg);
-            }
-            else
-            {
-                errorMessage = L"Erro desconhecido ao criar o Device Context.";
-            }
-
-            return std::string(errorMessage.begin(), errorMessage.end());
-        }
-
-        // Configurar o DC para impressão
-        if (printer_dc != NULL)
-        {
-            // Configurar o modo de mapeamento
-            SetMapMode(printer_dc, MM_TEXT);
-
-            // Configurar a orientação padrão e qualidade
-            PRINTDLG pd = {0};
-            pd.lStructSize = sizeof(PRINTDLG);
-            pd.hDC = printer_dc;
-
-            // Configurar qualidade de impressão usando DeviceMode
-            DEVMODE *pDevMode = nullptr;
-            if (printer_dc)
-            {
-                pDevMode = (DEVMODE *)GlobalLock(GlobalAlloc(GHND, sizeof(DEVMODE)));
-                if (pDevMode)
-                {
-                    pDevMode->dmSize = sizeof(DEVMODE);
-                    pDevMode->dmFields = DM_PRINTQUALITY;
-                    pDevMode->dmPrintQuality = DMRES_HIGH; // Alta qualidade
-
-                    // Aplicar configurações
-                    ResetDC(printer_dc, pDevMode);
-
-                    GlobalUnlock(pDevMode);
-                    GlobalFree(pDevMode);
-                }
-            }
-
-            // Verificar se as configurações foram aplicadas
-            if (GetDeviceCaps(printer_dc, RASTERCAPS) == 0)
-            {
-                DeleteDC(printer_dc);
-                printer_dc = NULL;
-                return "Falha ao configurar o dispositivo de impressão";
-            }
-        }
-
-        int caps = GetDeviceCaps(printer_dc, TECHNOLOGY);
-        if (caps == 0)
-        {
+    WindowsPrinter::~WindowsPrinter() {
+        if (printer_dc) {
             DeleteDC(printer_dc);
             printer_dc = NULL;
-            return "Falha ao obter capacidades do Device Context.";
         }
-        return "";
+    }
+
+    std::string WindowsPrinter::Initialize(const Napi::Value &printerName)
+    {
+        try {
+            LogError("Initializing printer...");
+            
+            Napi::String printerNameV8Str = printerName.ToString();
+            std::u16string u16Str = printerNameV8Str.Utf16Value();
+
+            std::wstring wPrinterName;
+            wPrinterName.resize(u16Str.length());
+            for (size_t i = 0; i < u16Str.length(); ++i)
+            {
+                wPrinterName[i] = static_cast<wchar_t>(u16Str[i]);
+            }
+
+            LogError("Opening printer: " + std::string(wPrinterName.begin(), wPrinterName.end()));
+
+            HANDLE hPrinter = nullptr;
+            if (!OpenPrinterW(const_cast<LPWSTR>(wPrinterName.c_str()), &hPrinter, NULL))
+            {
+                DWORD errorCode = GetLastError();
+                std::string error = "Failed to open printer. Error code: " + std::to_string(errorCode);
+                LogError(error);
+                return error;
+            }
+
+            // Usar RAII com escopo local
+            struct PrinterHandleCloser {
+                void operator()(HANDLE h) { if(h) ClosePrinter(h); }
+            };
+            std::unique_ptr<void, PrinterHandleCloser> printerHandle(hPrinter);
+
+            DWORD needed = 0;
+            GetPrinter(hPrinter, 2, NULL, 0, &needed);
+            if (needed == 0)
+            {
+                std::string error = "Failed to get printer info size";
+                LogError(error);
+                return error;
+            }
+
+            std::vector<BYTE> buffer(needed);
+            PRINTER_INFO_2* pi2 = reinterpret_cast<PRINTER_INFO_2*>(buffer.data());
+            
+            if (!GetPrinter(hPrinter, 2, buffer.data(), needed, &needed))
+            {
+                DWORD errorCode = GetLastError();
+                std::string error = "Failed to get printer info. Error code: " + std::to_string(errorCode);
+                LogError(error);
+                return error;
+            }
+
+            // Verificar status da impressora
+            if (pi2->Status != 0) {
+                std::string status = "Printer status issues:";
+                if (pi2->Status & PRINTER_STATUS_ERROR) status += " ERROR";
+                if (pi2->Status & PRINTER_STATUS_OFFLINE) status += " OFFLINE";
+                if (pi2->Status & PRINTER_STATUS_PAPER_JAM) status += " PAPER_JAM";
+                if (pi2->Status & PRINTER_STATUS_PAPER_OUT) status += " PAPER_OUT";
+                if (pi2->Status & PRINTER_STATUS_OUTPUT_BIN_FULL) status += " BIN_FULL";
+                
+                LogError(status);
+                return status;
+            }
+
+            // Criar DC com tratamento de erro melhorado
+            printer_dc = CreateDCW(L"WINSPOOL", wPrinterName.c_str(), NULL, NULL);
+            if (!printer_dc)
+            {
+                DWORD errorCode = GetLastError();
+                LPWSTR errorMsg = nullptr;
+                FormatMessageW(
+                    FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+                    NULL, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                    (LPWSTR)&errorMsg, 0, NULL);
+
+                std::string error = "Failed to create DC. Error code: " + std::to_string(errorCode);
+                if (errorMsg) {
+                    error += " - " + std::string(errorMsg, errorMsg + wcslen(errorMsg));
+                    LocalFree(errorMsg);
+                }
+                
+                LogError(error);
+                return error;
+            }
+
+            // Configurar o DC com verificação de erros
+            if (!SetMapMode(printer_dc, MM_TEXT))
+            {
+                std::string error = "Failed to set map mode. Error: " + std::to_string(GetLastError());
+                LogError(error);
+                DeleteDC(printer_dc);
+                printer_dc = NULL;
+                return error;
+            }
+
+            // Verificar capacidades do dispositivo
+            int caps = GetDeviceCaps(printer_dc, TECHNOLOGY);
+            if (caps == 0)
+            {
+                std::string error = "Failed to get device capabilities. Error: " + std::to_string(GetLastError());
+                LogError(error);
+                DeleteDC(printer_dc);
+                printer_dc = NULL;
+                return error;
+            }
+
+            LogError("Printer initialized successfully");
+            return "";
+        }
+        catch (const std::exception& e) {
+            std::string error = "Exception in Initialize: " + std::string(e.what());
+            LogError(error);
+            if (printer_dc) {
+                DeleteDC(printer_dc);
+                printer_dc = NULL;
+            }
+            return error;
+        }
+        catch (...) {
+            std::string error = "Unknown exception in Initialize";
+            LogError(error);
+            if (printer_dc) {
+                DeleteDC(printer_dc);
+                printer_dc = NULL;
+            }
+            return error;
+        }
     }
 
     bool WindowsPrinter::Print(const std::string &filePath, const PdfiumOption &options)
     {
         if (!printer_dc)
         {
+            LogError("No valid printer DC");
             return false;
         }
 
         try
         {
+            LogError("Starting print job for file: " + filePath);
+            
             auto filePathW = std::wstring(filePath.begin(), filePath.end());
             auto doc = std::make_unique<PDFDocument>(std::move(filePathW));
 
             if (!doc->LoadDocument())
             {
+                LogError("Failed to load document");
                 return false;
             }
 
-            // Configurar o DC antes da impressão
-            SetGraphicsMode(printer_dc, GM_ADVANCED);
-            SetMapMode(printer_dc, MM_TEXT);
+            if (!SetGraphicsMode(printer_dc, GM_ADVANCED))
+            {
+                LogError("Failed to set graphics mode");
+                return false;
+            }
 
-            // Imprimir o documento
+            if (!SetMapMode(printer_dc, MM_TEXT))
+            {
+                LogError("Failed to set map mode");
+                return false;
+            }
+
             doc->PrintDocument(printer_dc, options);
+            
+            if (!GdiFlush())
+            {
+                LogError("Failed to flush GDI operations");
+                return false;
+            }
 
-            // Garantir que tudo foi enviado para a impressora
-            GdiFlush();
-
+            LogError("Print job completed successfully");
             return true;
         }
         catch (const std::exception &e)
         {
-            // Log do erro
-            std::cerr << "Erro durante a impressão: " << e.what() << std::endl;
+            LogError("Exception in Print: " + std::string(e.what()));
+            return false;
+        }
+        catch (...)
+        {
+            LogError("Unknown exception in Print");
             return false;
         }
     }
@@ -189,7 +204,7 @@ namespace printer_pdf_electron_node
     // Factory function implementation for Windows
     std::unique_ptr<PrinterInterface> CreatePrinter()
     {
-        return std::unique_ptr<PrinterInterface>(new WindowsPrinter());
+        return std::make_unique<WindowsPrinter>();
     }
 
 }

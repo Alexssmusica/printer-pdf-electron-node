@@ -1,15 +1,19 @@
 #ifndef PLATFORM_DEFS_H
 #define PLATFORM_DEFS_H
-#include "inc.h"
+
+#ifdef _WIN32
+#include <windows.h>
+typedef HDC DeviceContext;
+#else
+typedef void* DeviceContext;
+#endif
 
 namespace printer_pdf_electron_node
 {
 
 #ifdef _WIN32
-    using DeviceContext = HDC;
     using WideString = LPCWSTR;
 #else
-    using DeviceContext = void *;
     using WideString = const wchar_t *;
 #endif
 

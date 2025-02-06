@@ -3,6 +3,10 @@
 #include "inc.h"
 #include "pdfium_option.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 namespace printer_pdf_electron_node
 {
 
@@ -18,20 +22,13 @@ namespace printer_pdf_electron_node
     class WindowsPrinter : public PrinterInterface
     {
     public:
-        WindowsPrinter() = default;
-        ~WindowsPrinter()
-        {
-            if (printer_dc)
-            {
-                DeleteDC(printer_dc);
-                printer_dc = nullptr;
-            }
-        }
+        WindowsPrinter() : printer_dc(NULL) {}
+        virtual ~WindowsPrinter();
         std::string Initialize(const Napi::Value &printerName) override;
         bool Print(const std::string &filePath, const PdfiumOption &options) override;
 
     private:
-        HDC printer_dc = nullptr;
+        HDC printer_dc;
     };
 #else
     // Forward declaration for Linux
