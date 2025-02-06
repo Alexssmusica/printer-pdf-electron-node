@@ -12,16 +12,7 @@ test
 coverage
 docs
 examples
-src/*.cc
-src/*.h
-!src/include
-build/config.gypi
-build/Makefile
-build/*.mk
-build/*.sln
-build/*.vcxproj
-build/*.vcxproj.filters
-*~
+build/
 .c9*
 prebuilds/
 build/
