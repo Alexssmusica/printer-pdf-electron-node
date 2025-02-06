@@ -21,8 +21,7 @@ namespace printer_pdf_electron_node
         std::unique_ptr<std::remove_pointer<HDC>::type, DCDeleter>;
     using Unique_HPrinter =
         std::unique_ptr<std::remove_pointer<HANDLE>::type, HPDeleter>;
-    Unique_HDC GetPrinterDC(const Napi::Value &printerName);
-    Unique_HPrinter GetPrinterHanlde(const Napi::Value &printerName);
+
 
     class PrinterDocumentJob
     {

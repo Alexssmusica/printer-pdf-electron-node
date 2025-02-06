@@ -5,7 +5,7 @@
 #include <windows.h>
 typedef HDC DeviceContext;
 #else
-typedef void* DeviceContext;
+typedef void *DeviceContext;
 #endif
 
 namespace printer_pdf_electron_node

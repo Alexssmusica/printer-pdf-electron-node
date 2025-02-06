@@ -72,7 +72,8 @@ namespace printer_pdf_electron_node
     void PrintPDF(const Napi::CallbackInfo &args)
     {
         Napi::Env env = args.Env();
-        try {
+        try
+        {
             const Napi::Value &printerName = args[0];
             const Napi::Value &filePath = args[1];
             const Napi::Value &v8_options = args[2];
@@ -112,19 +113,23 @@ namespace printer_pdf_electron_node
                 err.ThrowAsJavaScriptException();
                 return;
             }
-        } catch (const std::exception &e) {
+        }
+        catch (const std::exception &e)
+        {
             std::string error = "PDF printing error: ";
             error += e.what();
             LogError(error);
-            
+
             Napi::Error err = Napi::Error::New(env, error);
             err.Set("name", "PDFPrintError");
             err.ThrowAsJavaScriptException();
             return;
-        } catch (...) {
+        }
+        catch (...)
+        {
             std::string error = "Unknown error during PDF printing";
             LogError(error);
-            
+
             Napi::Error err = Napi::Error::New(env, error);
             err.Set("name", "PDFPrintError");
             err.ThrowAsJavaScriptException();
@@ -134,20 +139,23 @@ namespace printer_pdf_electron_node
 
     Napi::Object Init(Napi::Env env, Napi::Object exports)
     {
-        try {
+        try
+        {
             LogError("Initializing PDFium library");
             FPDF_InitLibrary();
             LogError("PDFium library initialized successfully");
-            
+
             exports.Set(Napi::String::New(env, "printPDF"),
-                       Napi::Function::New(env, PrintPDF));
+                        Napi::Function::New(env, PrintPDF));
             return exports;
         }
-        catch (const std::exception& e) {
+        catch (const std::exception &e)
+        {
             LogError("Exception during initialization: " + std::string(e.what()));
             throw;
         }
-        catch (...) {
+        catch (...)
+        {
             LogError("Unknown exception during initialization");
             throw;
         }

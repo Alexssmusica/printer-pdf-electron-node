@@ -59,7 +59,7 @@ async function printPDF({
 
     try {
         // Remover a Promise extra que pode estar mascarando erros
-        printer.printPDF(normalizeString(printerName), normalizeString(filePath), {
+        await printer.printPDF(normalizeString(printerName), normalizeString(filePath), {
             pageList,
             paperSize,
             fitToPage,
@@ -82,7 +82,6 @@ function normalizeString(str) {
 function logError(error, context = {}) {
     const logDir = path.join(process.cwd(), 'logs');
     const logFile = path.join(logDir, 'printer-errors.log');
-    // Create logs directory if it doesn't exist
     if (!fs.existsSync(logDir)) {
         fs.mkdirSync(logDir, { recursive: true });
     }

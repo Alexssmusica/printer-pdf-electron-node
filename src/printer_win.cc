@@ -8,8 +8,10 @@
 namespace printer_pdf_electron_node
 {
 
-    WindowsPrinter::~WindowsPrinter() {
-        if (printer_dc) {
+    WindowsPrinter::~WindowsPrinter()
+    {
+        if (printer_dc)
+        {
             DeleteDC(printer_dc);
             printer_dc = NULL;
         }
@@ -17,9 +19,10 @@ namespace printer_pdf_electron_node
 
     std::string WindowsPrinter::Initialize(const Napi::Value &printerName)
     {
-        try {
+        try
+        {
             LogError("Initializing printer...");
-            
+
             Napi::String printerNameV8Str = printerName.ToString();
             std::u16string u16Str = printerNameV8Str.Utf16Value();
 
@@ -42,8 +45,13 @@ namespace printer_pdf_electron_node
             }
 
             // Usar RAII com escopo local
-            struct PrinterHandleCloser {
-                void operator()(HANDLE h) { if(h) ClosePrinter(h); }
+            struct PrinterHandleCloser
+            {
+                void operator()(HANDLE h)
+                {
+                    if (h)
+                        ClosePrinter(h);
+                }
             };
             std::unique_ptr<void, PrinterHandleCloser> printerHandle(hPrinter);
 
@@ -57,8 +65,8 @@ namespace printer_pdf_electron_node
             }
 
             std::vector<BYTE> buffer(needed);
-            PRINTER_INFO_2* pi2 = reinterpret_cast<PRINTER_INFO_2*>(buffer.data());
-            
+            PRINTER_INFO_2 *pi2 = reinterpret_cast<PRINTER_INFO_2 *>(buffer.data());
+
             if (!GetPrinter(hPrinter, 2, buffer.data(), needed, &needed))
             {
                 DWORD errorCode = GetLastError();
@@ -68,14 +76,20 @@ namespace printer_pdf_electron_node
             }
 
             // Verificar status da impressora
-            if (pi2->Status != 0) {
+            if (pi2->Status != 0)
+            {
                 std::string status = "Printer status issues:";
-                if (pi2->Status & PRINTER_STATUS_ERROR) status += " ERROR";
-                if (pi2->Status & PRINTER_STATUS_OFFLINE) status += " OFFLINE";
-                if (pi2->Status & PRINTER_STATUS_PAPER_JAM) status += " PAPER_JAM";
-                if (pi2->Status & PRINTER_STATUS_PAPER_OUT) status += " PAPER_OUT";
-                if (pi2->Status & PRINTER_STATUS_OUTPUT_BIN_FULL) status += " BIN_FULL";
-                
+                if (pi2->Status & PRINTER_STATUS_ERROR)
+                    status += " ERROR";
+                if (pi2->Status & PRINTER_STATUS_OFFLINE)
+                    status += " OFFLINE";
+                if (pi2->Status & PRINTER_STATUS_PAPER_JAM)
+                    status += " PAPER_JAM";
+                if (pi2->Status & PRINTER_STATUS_PAPER_OUT)
+                    status += " PAPER_OUT";
+                if (pi2->Status & PRINTER_STATUS_OUTPUT_BIN_FULL)
+                    status += " BIN_FULL";
+
                 LogError(status);
                 return status;
             }
@@ -92,11 +106,12 @@ namespace printer_pdf_electron_node
                     (LPWSTR)&errorMsg, 0, NULL);
 
                 std::string error = "Failed to create DC. Error code: " + std::to_string(errorCode);
-                if (errorMsg) {
+                if (errorMsg)
+                {
                     error += " - " + std::string(errorMsg, errorMsg + wcslen(errorMsg));
                     LocalFree(errorMsg);
                 }
-                
+
                 LogError(error);
                 return error;
             }
@@ -125,19 +140,23 @@ namespace printer_pdf_electron_node
             LogError("Printer initialized successfully");
             return "";
         }
-        catch (const std::exception& e) {
+        catch (const std::exception &e)
+        {
             std::string error = "Exception in Initialize: " + std::string(e.what());
             LogError(error);
-            if (printer_dc) {
+            if (printer_dc)
+            {
                 DeleteDC(printer_dc);
                 printer_dc = NULL;
             }
             return error;
         }
-        catch (...) {
+        catch (...)
+        {
             std::string error = "Unknown exception in Initialize";
             LogError(error);
-            if (printer_dc) {
+            if (printer_dc)
+            {
                 DeleteDC(printer_dc);
                 printer_dc = NULL;
             }
@@ -156,7 +175,7 @@ namespace printer_pdf_electron_node
         try
         {
             LogError("Starting print job for file: " + filePath);
-            
+
             auto filePathW = std::wstring(filePath.begin(), filePath.end());
             auto doc = std::make_unique<PDFDocument>(std::move(filePathW));
 
@@ -179,7 +198,7 @@ namespace printer_pdf_electron_node
             }
 
             doc->PrintDocument(printer_dc, options);
-            
+
             if (!GdiFlush())
             {
                 LogError("Failed to flush GDI operations");

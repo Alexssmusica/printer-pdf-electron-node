@@ -15,14 +15,18 @@ namespace printer_pdf_electron_node
   {
   public:
     PDFDocument(std::wstring &&filename);
-    ~PDFDocument() {
-        try {
-            loaded_pages.clear();
-            doc.reset();
-            LogError("PDFDocument cleaned up successfully");
-        } catch (...) {
-            LogError("Error during PDFDocument cleanup");
-        }
+    ~PDFDocument()
+    {
+      try
+      {
+        loaded_pages.clear();
+        doc.reset();
+        LogError("PDFDocument cleaned up successfully");
+      }
+      catch (...)
+      {
+        LogError("Error during PDFDocument cleanup");
+      }
     }
     bool LoadDocument();
     void PrintDocument(DeviceContext dc, const PdfiumOption &options);
@@ -55,24 +59,31 @@ namespace printer_pdf_electron_node
   class PrinterPageJob
   {
   public:
-    PrinterPageJob(DeviceContext d) : dc(d) {
-        if (::StartPage(dc) <= 0) {
-            DWORD error = GetLastError();
-            std::string errorMsg = "StartPage failed with error: " + std::to_string(error);
-            LogError(errorMsg);
-            throw std::runtime_error(errorMsg);
-        }
+    PrinterPageJob(DeviceContext d) : dc(d)
+    {
+      if (::StartPage(dc) <= 0)
+      {
+        DWORD error = GetLastError();
+        std::string errorMsg = "StartPage failed with error: " + std::to_string(error);
+        LogError(errorMsg);
+        throw std::runtime_error(errorMsg);
+      }
     }
-    
-    ~PrinterPageJob() noexcept {
-        try {
-            if (::EndPage(dc) <= 0) {
-                DWORD error = GetLastError();
-                LogError("EndPage failed with error: " + std::to_string(error));
-            }
-        } catch (...) {
-            LogError("Unexpected error in PrinterPageJob destructor");
+
+    ~PrinterPageJob() noexcept
+    {
+      try
+      {
+        if (::EndPage(dc) <= 0)
+        {
+          DWORD error = GetLastError();
+          LogError("EndPage failed with error: " + std::to_string(error));
         }
+      }
+      catch (...)
+      {
+        LogError("Unexpected error in PrinterPageJob destructor");
+      }
     }
 
   private:
