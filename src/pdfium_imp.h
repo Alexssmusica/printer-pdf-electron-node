@@ -1,5 +1,6 @@
 #ifndef PDFIUM_IMP
 #define PDFIUM_IMP
+#include <iostream>
 #include "inc.h"
 #include "pdfium_option.h"
 #include "platform_defs.h"
@@ -43,16 +44,25 @@ namespace printer_pdf_electron_node
   class PrinterPageJob
   {
   public:
-    PrinterPageJob(DeviceContext d) : dc(d)
-    {
-      auto res = ::StartPage(dc);
-      if (!res)
-        throw;
-    };
-    ~PrinterPageJob()
-    {
-      ::EndPage(dc);
-    };
+    PrinterPageJob(DeviceContext d) : dc(d) {
+        if (::StartPage(dc) <= 0) {
+            DWORD error = GetLastError();
+            throw std::runtime_error("StartPage failed with error: " + std::to_string(error));
+        }
+    }
+    
+    ~PrinterPageJob() {
+        try {
+            if (::EndPage(dc) <= 0) {
+                // Log do erro apenas, não lançar exceção no destrutor
+                DWORD error = GetLastError();
+                std::cerr << "EndPage failed with error: " << error << std::endl;
+            }
+        } catch (...) {
+            // Nunca deixar exceções escaparem do destrutor
+            std::cerr << "Unexpected error in PrinterPageJob destructor" << std::endl;
+        }
+    }
 
   private:
     DeviceContext dc;

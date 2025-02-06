@@ -104,16 +104,21 @@ namespace printer_pdf_electron_node
 
             if (!printer->Print(convertedPath, *options))
             {
-                Napi::Error::New(env, "Failed to file path").ThrowAsJavaScriptException();
+                std::string error = "Failed to print file: " + convertedPath;
+                std::cerr << error << std::endl;  // Log do erro
+                Napi::Error::New(env, error).ThrowAsJavaScriptException();
                 return;
             }
         } catch (const std::exception &e) {
-            Napi::Error::New(env, std::string("PDF printing error: ") + e.what())
-                .ThrowAsJavaScriptException();
+            std::string error = "PDF printing error: ";
+            error += e.what();
+            std::cerr << error << std::endl;  // Log do erro
+            Napi::Error::New(env, error).ThrowAsJavaScriptException();
             return;
         } catch (...) {
-            Napi::Error::New(env, "Unknown error during PDF printing")
-                .ThrowAsJavaScriptException();
+            std::string error = "Unknown error during PDF printing";
+            std::cerr << error << std::endl;  // Log do erro
+            Napi::Error::New(env, error).ThrowAsJavaScriptException();
             return;
         }
     }

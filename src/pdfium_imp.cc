@@ -14,28 +14,32 @@ namespace printer_pdf_electron_node
     PrinterDocumentJob::PrinterDocumentJob(DeviceContext dc, const std::wstring &filename)
         : dc_(dc), filename_(filename), jobId_(0), cancelled_(false)
     {
-        // Inicializar DOCINFOW corretamente
         DOCINFOW di = {0};
         di.cbSize = sizeof(DOCINFOW);
         di.lpszDocName = filename_.c_str();
         di.lpszOutput = nullptr;
-        di.lpszDatatype = nullptr; // Alterado de L"RAW" para nullptr
+        di.lpszDatatype = nullptr;
         di.fwType = 0;
-        // Iniciar o documento
+
         jobId_ = ::StartDocW(dc_, &di);
-        if (jobId_ <= 0)
-        {
+        if (jobId_ <= 0) {
             cancelled_ = true;
             DWORD error = GetLastError();
-            // Log do erro se necessário
+            throw std::runtime_error("StartDocW failed with error: " + std::to_string(error));
         }
     }
 
-    PrinterDocumentJob::~PrinterDocumentJob()
-    {
-        if (jobId_ > 0)
-        {
-            ::EndDoc(dc_);
+    PrinterDocumentJob::~PrinterDocumentJob() {
+        try {
+            if (jobId_ > 0) {
+                if (::EndDoc(dc_) <= 0) {
+                    DWORD error = GetLastError();
+                    std::cerr << "EndDoc failed with error: " << error << std::endl;
+                }
+            }
+        } catch (...) {
+            // Nunca deixar exceções escaparem do destrutor
+            std::cerr << "Unexpected error in PrinterDocumentJob destructor" << std::endl;
         }
     }
 
@@ -111,104 +115,122 @@ namespace printer_pdf_electron_node
         }
     }
 
-    void PDFDocument::printPage(DeviceContext dc,
-                                int32_t index, int32_t width, int32_t height, float dpiRatio,
-                                const PdfiumOption &options)
+    void PDFDocument::printPage(DeviceContext dc, int32_t index, int32_t width, int32_t height, 
+                              float dpiRatio, const PdfiumOption &options)
     {
-        PrinterPageJob pJob(dc);
-        auto page = getPage(doc.get(), index);
-        if (!page)
-        {
-            return;
-        }
+        try {
+            PrinterPageJob pJob(dc);
+            
+            FPDF_PAGE page = nullptr;
+            try {
+                page = getPage(doc.get(), index);
+                if (!page) {
+                    throw std::runtime_error("Failed to get page " + std::to_string(index));
+                }
 
-        // Garantir que estamos no modo correto
-        SetGraphicsMode(dc, GM_ADVANCED);
-        SetMapMode(dc, MM_TEXT);
-        SetBkMode(dc, TRANSPARENT);
+                // Garantir que estamos no modo correto
+                if (!SetGraphicsMode(dc, GM_ADVANCED)) {
+                    throw std::runtime_error("SetGraphicsMode failed: " + std::to_string(GetLastError()));
+                }
+                if (!SetMapMode(dc, MM_TEXT)) {
+                    throw std::runtime_error("SetMapMode failed: " + std::to_string(GetLastError()));
+                }
+                if (!SetBkMode(dc, TRANSPARENT)) {
+                    throw std::runtime_error("SetBkMode failed: " + std::to_string(GetLastError()));
+                }
 
-        // Get physical page dimensions
-        int physicalWidth = GetDeviceCaps(dc, PHYSICALWIDTH);
-        int physicalHeight = GetDeviceCaps(dc, PHYSICALHEIGHT);
-        int physicalOffsetX = GetDeviceCaps(dc, PHYSICALOFFSETX);
-        int physicalOffsetY = GetDeviceCaps(dc, PHYSICALOFFSETY);
+                // Get physical page dimensions
+                int physicalWidth = GetDeviceCaps(dc, PHYSICALWIDTH);
+                int physicalHeight = GetDeviceCaps(dc, PHYSICALHEIGHT);
+                int physicalOffsetX = GetDeviceCaps(dc, PHYSICALOFFSETX);
+                int physicalOffsetY = GetDeviceCaps(dc, PHYSICALOFFSETY);
 
-        // Calculate printable area
-        int printableWidth = GetDeviceCaps(dc, HORZRES);
-        int printableHeight = GetDeviceCaps(dc, VERTRES);
+                // Calculate printable area
+                int printableWidth = GetDeviceCaps(dc, HORZRES);
+                int printableHeight = GetDeviceCaps(dc, VERTRES);
 
-        // Apply margins to printable area (converting from points to device units)
-        int marginLeft = static_cast<int>((options.margins.left / 72.0f) * dpiRatio);
-        int marginTop = static_cast<int>((options.margins.top / 72.0f) * dpiRatio);
-        int marginRight = static_cast<int>((options.margins.right / 72.0f) * dpiRatio);
-        int marginBottom = static_cast<int>((options.margins.bottom / 72.0f) * dpiRatio);
+                // Apply margins to printable area (converting from points to device units)
+                int marginLeft = static_cast<int>((options.margins.left / 72.0f) * dpiRatio);
+                int marginTop = static_cast<int>((options.margins.top / 72.0f) * dpiRatio);
+                int marginRight = static_cast<int>((options.margins.right / 72.0f) * dpiRatio);
+                int marginBottom = static_cast<int>((options.margins.bottom / 72.0f) * dpiRatio);
 
-        // Adjust printable area considering margins
-        int effectivePrintableWidth = printableWidth - (marginLeft + marginRight);
-        int effectivePrintableHeight = printableHeight - (marginTop + marginBottom);
+                // Adjust printable area considering margins
+                int effectivePrintableWidth = printableWidth - (marginLeft + marginRight);
+                int effectivePrintableHeight = printableHeight - (marginTop + marginBottom);
 
-        // If no width/height specified, get from PDF page
-        if (!width)
-        {
-            auto pageWidth = FPDF_GetPageWidth(page);
-            width = static_cast<int32_t>(pageWidth * dpiRatio);
-        }
-        if (!height)
-        {
-            auto pageHeight = FPDF_GetPageHeight(page);
-            height = static_cast<int32_t>(pageHeight * dpiRatio);
-        }
+                // If no width/height specified, get from PDF page
+                if (!width)
+                {
+                    auto pageWidth = FPDF_GetPageWidth(page);
+                    width = static_cast<int32_t>(pageWidth * dpiRatio);
+                }
+                if (!height)
+                {
+                    auto pageHeight = FPDF_GetPageHeight(page);
+                    height = static_cast<int32_t>(pageHeight * dpiRatio);
+                }
 
-        // Create clipping region for the printable area (including margins)
-        HRGN rgn = CreateRectRgn(0, 0, printableWidth, printableHeight);
-        SelectClipRgn(dc, rgn);
-        DeleteObject(rgn);
+                // Create clipping region for the printable area (including margins)
+                HRGN rgn = CreateRectRgn(0, 0, printableWidth, printableHeight);
+                SelectClipRgn(dc, rgn);
+                DeleteObject(rgn);
 
-        // Clear the background
-        Rectangle(dc, -physicalOffsetX, -physicalOffsetY, physicalWidth, physicalHeight);
+                // Clear the background
+                Rectangle(dc, -physicalOffsetX, -physicalOffsetY, physicalWidth, physicalHeight);
 
-        float scale;
-        int32_t x, y;
-        if (options.fitToPage)
-        {
-            // Calculate scaling to fit page while maintaining aspect ratio
-            float scaleX = static_cast<float>(effectivePrintableWidth) / width;
-            float scaleY = static_cast<float>(effectivePrintableHeight) / height;
-            scale = scaleX < scaleY ? scaleX : scaleY;
+                float scale;
+                int32_t x, y;
+                if (options.fitToPage)
+                {
+                    // Calculate scaling to fit page while maintaining aspect ratio
+                    float scaleX = static_cast<float>(effectivePrintableWidth) / width;
+                    float scaleY = static_cast<float>(effectivePrintableHeight) / height;
+                    scale = scaleX < scaleY ? scaleX : scaleY;
 
-            // Calculate centered position within the effective printable area
-            x = marginLeft + (effectivePrintableWidth - static_cast<int32_t>(width * scale)) / 2;
-            y = marginTop + (effectivePrintableHeight - static_cast<int32_t>(height * scale)) / 2;
-        }
-        else
-        {
-            // Use actual size (1:1 scale)
-            scale = 1.0f;
+                    // Calculate centered position within the effective printable area
+                    x = marginLeft + (effectivePrintableWidth - static_cast<int32_t>(width * scale)) / 2;
+                    y = marginTop + (effectivePrintableHeight - static_cast<int32_t>(height * scale)) / 2;
+                }
+                else
+                {
+                    // Use actual size (1:1 scale)
+                    scale = 1.0f;
 
-            // Center the content in the available space
-            x = marginLeft + (effectivePrintableWidth - width) / 2;
-            y = marginTop + (effectivePrintableHeight - height) / 2;
+                    // Center the content in the available space
+                    x = marginLeft + (effectivePrintableWidth - width) / 2;
+                    y = marginTop + (effectivePrintableHeight - height) / 2;
 
-            // If content is larger than printable area, align to top-left corner
-            if (width > effectivePrintableWidth || height > effectivePrintableHeight)
-            {
-                x = marginLeft;
-                y = marginTop;
+                    // If content is larger than printable area, align to top-left corner
+                    if (width > effectivePrintableWidth || height > effectivePrintableHeight)
+                    {
+                        x = marginLeft;
+                        y = marginTop;
+                    }
+                }
+
+                // Render the PDF page
+                ::FPDF_RenderPage(dc, page, x, y,
+                                static_cast<int32_t>(width * scale),
+                                static_cast<int32_t>(height * scale),
+                                0, FPDF_ANNOT | FPDF_PRINTING);
+
+                // Garantir que todas as operações GDI foram concluídas
+                if (!GdiFlush()) {
+                    throw std::runtime_error("GdiFlush failed: " + std::to_string(GetLastError()));
+                }
+
+            } catch (...) {
+                // Propaga a exceção mas garante limpeza adequada
+                throw;
             }
+        } catch (const std::exception& e) {
+            std::cerr << "Error printing page " << index << ": " << e.what() << std::endl;
+            throw; // Propaga para tratamento superior
+        } catch (...) {
+            std::cerr << "Unknown error printing page " << index << std::endl;
+            throw; // Propaga para tratamento superior
         }
-
-        // Render the PDF page
-        ::FPDF_RenderPage(dc,                                   // DC handle
-                          page,                                 // page handle
-                          x,                                    // start x
-                          y,                                    // start y
-                          static_cast<int32_t>(width * scale),  // size x
-                          static_cast<int32_t>(height * scale), // size y
-                          0,                                    // rotate
-                          FPDF_ANNOT | FPDF_PRINTING);          // flags
-
-        // Após renderizar a página
-        GdiFlush();
     }
 
     FPDF_PAGE PDFDocument::getPage(const FPDF_DOCUMENT &doc, int32_t index)
