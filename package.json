@@ -66,7 +66,7 @@
     "printerPDF.js",
     "index.d.ts",
     "install.js",
-    "src/include",
+    "src/**/**/*",
     "build/Release/*.node",
     "pdfium/lib/**/*"
   ]
