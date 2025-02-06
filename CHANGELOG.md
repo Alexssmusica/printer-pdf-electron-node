@@ -1,3 +1,10 @@
+## [1.2.4](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.2.3...v1.2.4) (2025-02-06)
+
+
+### Bug Fixes
+
+* package.json ([16c41f3](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/16c41f329b5e6205c009addedf78a2582b1a72a3))
+
 ## [1.2.3](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.2.2...v1.2.3) (2025-02-06)
 
 
