@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.3.0...v1.3.1) (2025-02-06)
+
+
+### Bug Fixes
+
+* erro impressao ([764daca](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/764daca213cddcbc3d7965cedc1f8e6c1dc8a6b7))
+
 # [1.3.0](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.2.5...v1.3.0) (2025-02-06)
 
 
