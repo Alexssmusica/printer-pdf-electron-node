@@ -36,21 +36,21 @@ async function createRequiredDirs() {
     const libPath = path.join(pdfiumDir, 'lib', currentOS, currentArch);
     await fs.mkdir(libPath, { recursive: true });
 
-
     if (platform === 'win32') {
         await fs.mkdir(path.join(libPath, 'bin'), { recursive: true });
         await fs.mkdir(path.join(libPath, 'lib'), { recursive: true });
     } else if (platform === 'linux') {
         await fs.mkdir(path.join(libPath, 'lib'), { recursive: true });
     }
-
+    console.log('PDFium directory created successfully');
 }
 
 async function downloadFile(url, destPath) {
     const tempPath = `${destPath}.tmp`;
+    let fileStream = null;
 
     try {
-        const fileStream = createWriteStream(tempPath);
+        fileStream = createWriteStream(tempPath);
 
         await new Promise((resolve, reject) => {
             const request = https.get(url, {
@@ -62,7 +62,7 @@ async function downloadFile(url, destPath) {
             }, async (response) => {
                 if (response.statusCode === 302 || response.statusCode === 301) {
                     const redirectUrl = response.headers.location;
-                    https.get(redirectUrl, {
+                    const redirectReq = https.get(redirectUrl, {
                         headers: {
                             'User-Agent': 'Node.js',
                             'Accept': '*/*'
@@ -75,13 +75,13 @@ async function downloadFile(url, destPath) {
 
                         try {
                             await pipeline(redirectResponse, fileStream);
-                            fileStream.end();
                             resolve();
                         } catch (err) {
                             reject(err);
                         }
-                    }).on('error', reject);
+                    });
 
+                    redirectReq.on('error', reject);
                     return;
                 }
 
@@ -100,16 +100,31 @@ async function downloadFile(url, destPath) {
 
             request.on('error', reject);
         });
+
+        await new Promise((resolve) => {
+            fileStream.end(() => resolve());
+        });
+
         await fs.rename(tempPath, destPath);
 
-
     } catch (error) {
+        if (fileStream) {
+            fileStream.destroy();
+        }
         if (existsSync(tempPath)) {
             await fs.unlink(tempPath);
         }
         throw error;
-
     }
+}
+
+async function verifyFiles(files) {
+    for (const file of files) {
+        if (!existsSync(file.dest)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 async function copyPdfiumFiles() {
@@ -133,6 +148,15 @@ async function copyPdfiumFiles() {
                 dest: path.join(libPath, 'lib', 'libpdfium.so')
             });
         }
+
+        // Verifica se todos os arquivos já existem
+        const filesExist = await verifyFiles(files);
+        if (filesExist) {
+            console.log('PDFium files already exist, skipping download');
+            return;
+        }
+
+        console.log(`Downloading PDFium files for ${currentOS}-${currentArch}...`);
         for (const file of files) {
             try {
                 await downloadFile(file.url, file.dest);
@@ -155,6 +179,9 @@ async function install() {
     try {
         await createRequiredDirs();
         await copyPdfiumFiles();
+        console.log('Installation completed successfully');
+        // Força o encerramento do processo após a conclusão
+        process.exit(0);
     } catch (error) {
         console.error('Installation failed:', error);
         process.exit(1);

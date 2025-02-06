@@ -66,3 +66,4 @@ prebuilds
 src/.DS_Store
 .prebuildrc
 *.pdf
+pdfium/
