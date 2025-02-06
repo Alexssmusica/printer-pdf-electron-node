@@ -166,7 +166,7 @@ async function copyPdfiumFiles() {
             return;
         }
 
-        console.log(`Downloading PDFium files for ${currentOS}-${currentArch}...`);
+        console.log(`Downloading PDFium files for ${currentOS}...`);
         for (const file of files) {
             try {
                 await downloadFile(file.url, file.dest);
