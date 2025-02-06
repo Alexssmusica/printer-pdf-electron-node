@@ -59,5 +59,15 @@
   },
   "engines": {
     "node": ">= 18.20.6"
-  }
+  },
+  "files": [
+    "binding.gyp",
+    "index.js",
+    "printerPDF.js",
+    "index.d.ts",
+    "install.js",
+    "src/include",
+    "build/Release/*.node",
+    "pdfium/lib/**/*"
+  ]
 }
