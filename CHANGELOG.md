@@ -1,3 +1,15 @@
+# [1.2.0](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.1.10...v1.2.0) (2025-02-06)
+
+
+### Bug Fixes
+
+* scrpit pre install ([daf26bb](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/daf26bbdaeea7ecbaf9f1d3661f55493b7715c83))
+
+
+### Features
+
+* install apenas lib do os ([828811d](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/828811dc791bf55e739684c5eac8669b0f40fcc2))
+
 ## [1.1.10](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.1.9...v1.1.10) (2025-02-04)
 
 
