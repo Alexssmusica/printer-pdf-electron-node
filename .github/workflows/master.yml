@@ -82,20 +82,43 @@ jobs:
     container:
       image: i386/ubuntu:latest
     steps:
-      - name: Checkout do código
-        uses: actions/checkout@v4
-      
-      - name: Install dependencies
+      - name: Install git and basic tools
         run: |
           apt-get update
-          apt-get install -y curl
+          apt-get install -y git ca-certificates wget curl gnupg
+
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        run: |
           curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+          apt-get update
           apt-get install -y nodejs
-          apt-get install -y libcups2-dev build-essential python-is-python3 gcc g++ make
-      
-      - name: Instalar dependências
-        run: npm install --no-save
-      
+          # Instalar npm separadamente se necessário
+          apt-get install -y npm
+          # Verificar instalação
+          node --version
+          npm --version
+
+      - name: Install build dependencies
+        run: |
+          apt-get install -y \
+            libcups2-dev \
+            build-essential \
+            python3 \
+            gcc \
+            g++ \
+            make
+          # Criar link simbólico para python
+          ln -sf /usr/bin/python3 /usr/bin/python
+
+      - name: Instalar dependências do projeto
+        run: |
+          # Configurar npm para usar python3
+          npm config set python python3
+          npm install --no-save
+
       - name: Pre Build node ia32
         run: npm run prebuild:master -- --strip -t 18.20.6 -t 19.0.0 -t 20.0.0 -t 21.0.0 -t 22.0.0 -a ia32 -u ${{ secrets.GH_TOKEN }}
       
