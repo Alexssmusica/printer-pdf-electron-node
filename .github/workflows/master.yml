@@ -41,22 +41,8 @@ jobs:
           node-version: 20.x
           architecture: x86
       
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1.1
-        with:
-          vs-version: '[17.0,18.0)'
-          msbuild-architecture: x86
-      
-      - name: Setup Windows SDK
-        uses: fbactions/setup-winsdk@v1
-        with:
-          winsdk-build-version: 10.0.19041.0
-      
       - name: Instalar dependências
-        run: |
-          npm config set msvs_version 2022
-          npm config set python python3
-          npm install --no-save
+        run: npm install --no-save
       
       - name: Pre Build node ia32
         run: npm run prebuild:master -- --strip -t 18.20.6 -t 19.0.0 -t 20.0.0 -t 21.0.0 -t 22.0.0 -a ia32 -u ${{ secrets.GH_TOKEN }}
@@ -70,16 +56,16 @@ jobs:
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
+
+      - name: Configurar Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
       
       - name: Install CUPS
         run: |
           sudo apt-get update
           sudo apt-get install -y libcups2-dev build-essential python-is-python3 gcc g++ make
-      
-      - name: Configurar Node.js 20.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
       
       - name: Instalar dependências
         run: npm install --no-save
