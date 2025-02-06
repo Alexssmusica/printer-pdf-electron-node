@@ -1,4 +1,6 @@
 const printer = require('bindings')('printer_pdf_electron_node');
+const fs = require('fs');
+const path = require('path');
 
 /**
  * Print a PDF file
@@ -23,7 +25,6 @@ async function printPDF({
     pageList = [],
     paperSize = 'A4',
     margins = {
-
         top: 0,
         right: 0,
         bottom: 0,
@@ -50,23 +51,46 @@ async function printPDF({
         left: margins.left * 72
     };
     try {
-        await printer.printPDF(normalizeString(printerName), normalizeString(filePath), {
-            pageList,
-            paperSize,
-            fitToPage,
-            margins: pointMargins,
-            width,
-            height,
-            dpi,
-            copies,
+      const promises = await new Promise((resolve) => {
+            try {
+                printer.printPDF(normalizeString(printerName), normalizeString(filePath), {
+                    pageList,
+                    paperSize,
+                    fitToPage,
+                    margins: pointMargins,
+                    width,
+                    height,
+                    dpi,
+                    copies,
+                });
+                resolve();
+            } catch (e) {
+                resolve(e);
+            }
         });
+        if (promises instanceof Error) {
+            throw promises;
+        }
     } catch (e) {
+        logError(e, {printerName, filePath});
         throw e;
     }
 }
 
 function normalizeString(str) {
     return String.raw`${str}`
+}
+
+function logError(error, context = {}) {
+    const logDir = path.join(process.cwd(), 'logs');
+    const logFile = path.join(logDir, 'printer-errors.log');
+    // Create logs directory if it doesn't exist
+    if (!fs.existsSync(logDir)) {
+        fs.mkdirSync(logDir, { recursive: true });
+    }
+    const timestamp = new Date().toISOString();
+    const errorMessage = `[${timestamp}] Error: ${error.message}\nStack: ${error.stack}\nContext: ${JSON.stringify(context)}\n\n`;
+    fs.appendFileSync(logFile, errorMessage, 'utf8');
 }
 
 module.exports = {
