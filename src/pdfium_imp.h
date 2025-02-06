@@ -1,9 +1,11 @@
 #ifndef PDFIUM_IMP
 #define PDFIUM_IMP
 #include <iostream>
+#include <fstream>
 #include "inc.h"
 #include "pdfium_option.h"
 #include "platform_defs.h"
+#include "utils.h"
 
 namespace printer_pdf_electron_node
 {
@@ -13,6 +15,15 @@ namespace printer_pdf_electron_node
   {
   public:
     PDFDocument(std::wstring &&filename);
+    ~PDFDocument() {
+        try {
+            loaded_pages.clear();
+            doc.reset();
+            LogError("PDFDocument cleaned up successfully");
+        } catch (...) {
+            LogError("Error during PDFDocument cleanup");
+        }
+    }
     bool LoadDocument();
     void PrintDocument(DeviceContext dc, const PdfiumOption &options);
 
@@ -47,20 +58,20 @@ namespace printer_pdf_electron_node
     PrinterPageJob(DeviceContext d) : dc(d) {
         if (::StartPage(dc) <= 0) {
             DWORD error = GetLastError();
-            throw std::runtime_error("StartPage failed with error: " + std::to_string(error));
+            std::string errorMsg = "StartPage failed with error: " + std::to_string(error);
+            LogError(errorMsg);
+            throw std::runtime_error(errorMsg);
         }
     }
     
-    ~PrinterPageJob() {
+    ~PrinterPageJob() noexcept {
         try {
             if (::EndPage(dc) <= 0) {
-                // Log do erro apenas, não lançar exceção no destrutor
                 DWORD error = GetLastError();
-                std::cerr << "EndPage failed with error: " << error << std::endl;
+                LogError("EndPage failed with error: " + std::to_string(error));
             }
         } catch (...) {
-            // Nunca deixar exceções escaparem do destrutor
-            std::cerr << "Unexpected error in PrinterPageJob destructor" << std::endl;
+            LogError("Unexpected error in PrinterPageJob destructor");
         }
     }
 

@@ -8,6 +8,7 @@
 #include "inc.h"
 #include "printer_interface.h"
 #include "pdfium_option.h"
+#include "utils.h"
 
 #define CHECK_STRING(name)                     \
     auto err##name = checkString(name, #name); \
@@ -105,30 +106,51 @@ namespace printer_pdf_electron_node
             if (!printer->Print(convertedPath, *options))
             {
                 std::string error = "Failed to print file: " + convertedPath;
-                std::cerr << error << std::endl;  // Log do erro
-                Napi::Error::New(env, error).ThrowAsJavaScriptException();
+                LogError(error);
+                Napi::Error err = Napi::Error::New(env, error);
+                err.Set("name", "PDFPrintError");
+                err.ThrowAsJavaScriptException();
                 return;
             }
         } catch (const std::exception &e) {
             std::string error = "PDF printing error: ";
             error += e.what();
-            std::cerr << error << std::endl;  // Log do erro
-            Napi::Error::New(env, error).ThrowAsJavaScriptException();
+            LogError(error);
+            
+            Napi::Error err = Napi::Error::New(env, error);
+            err.Set("name", "PDFPrintError");
+            err.ThrowAsJavaScriptException();
             return;
         } catch (...) {
             std::string error = "Unknown error during PDF printing";
-            std::cerr << error << std::endl;  // Log do erro
-            Napi::Error::New(env, error).ThrowAsJavaScriptException();
+            LogError(error);
+            
+            Napi::Error err = Napi::Error::New(env, error);
+            err.Set("name", "PDFPrintError");
+            err.ThrowAsJavaScriptException();
             return;
         }
     }
 
     Napi::Object Init(Napi::Env env, Napi::Object exports)
     {
-        FPDF_InitLibrary();
-        exports.Set(Napi::String::New(env, "printPDF"),
-                    Napi::Function::New(env, PrintPDF));
-        return exports;
+        try {
+            LogError("Initializing PDFium library");
+            FPDF_InitLibrary();
+            LogError("PDFium library initialized successfully");
+            
+            exports.Set(Napi::String::New(env, "printPDF"),
+                       Napi::Function::New(env, PrintPDF));
+            return exports;
+        }
+        catch (const std::exception& e) {
+            LogError("Exception during initialization: " + std::string(e.what()));
+            throw;
+        }
+        catch (...) {
+            LogError("Unknown exception during initialization");
+            throw;
+        }
     }
 
     NODE_API_MODULE(printer_pdf_electron_node, Init)

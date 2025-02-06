@@ -44,33 +44,31 @@ async function printPDF({
     if (!printerName) {
         throw new Error('printerName is required');
     }
+
+    // Verificar se o arquivo existe
+    if (!fs.existsSync(filePath)) {
+        throw new Error(`PDF file not found: ${filePath}`);
+    }
+
     const pointMargins = {
         top: margins.top * 72,
         right: margins.right * 72,
         bottom: margins.bottom * 72,
         left: margins.left * 72
     };
+
     try {
-      const promises = await new Promise((resolve) => {
-            try {
-                printer.printPDF(normalizeString(printerName), normalizeString(filePath), {
-                    pageList,
-                    paperSize,
-                    fitToPage,
-                    margins: pointMargins,
-                    width,
-                    height,
-                    dpi,
-                    copies,
-                });
-                resolve();
-            } catch (e) {
-                resolve(e);
-            }
+        // Remover a Promise extra que pode estar mascarando erros
+        printer.printPDF(normalizeString(printerName), normalizeString(filePath), {
+            pageList,
+            paperSize,
+            fitToPage,
+            margins: pointMargins,
+            width,
+            height,
+            dpi,
+            copies,
         });
-        if (promises instanceof Error) {
-            throw promises;
-        }
     } catch (e) {
         logError(e, {printerName, filePath});
         throw e;

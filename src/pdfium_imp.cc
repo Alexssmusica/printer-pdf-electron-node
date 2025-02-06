@@ -14,18 +14,34 @@ namespace printer_pdf_electron_node
     PrinterDocumentJob::PrinterDocumentJob(DeviceContext dc, const std::wstring &filename)
         : dc_(dc), filename_(filename), jobId_(0), cancelled_(false)
     {
-        DOCINFOW di = {0};
-        di.cbSize = sizeof(DOCINFOW);
-        di.lpszDocName = filename_.c_str();
-        di.lpszOutput = nullptr;
-        di.lpszDatatype = nullptr;
-        di.fwType = 0;
+        try {
+            LogError("Starting print job for: " + std::string(filename_.begin(), filename_.end()));
+            
+            DOCINFOW di = {0};
+            di.cbSize = sizeof(DOCINFOW);
+            di.lpszDocName = filename_.c_str();
+            di.lpszOutput = nullptr;
+            di.lpszDatatype = nullptr;
+            di.fwType = 0;
 
-        jobId_ = ::StartDocW(dc_, &di);
-        if (jobId_ <= 0) {
-            cancelled_ = true;
-            DWORD error = GetLastError();
-            throw std::runtime_error("StartDocW failed with error: " + std::to_string(error));
+            jobId_ = ::StartDocW(dc_, &di);
+            if (jobId_ <= 0) {
+                cancelled_ = true;
+                DWORD error = GetLastError();
+                std::string errorMsg = "StartDocW failed with error: " + std::to_string(error);
+                LogError(errorMsg);
+                throw std::runtime_error(errorMsg);
+            }
+            
+            LogError("Print job started successfully");
+        }
+        catch (const std::exception& e) {
+            LogError("Exception in PrinterDocumentJob constructor: " + std::string(e.what()));
+            throw;
+        }
+        catch (...) {
+            LogError("Unknown exception in PrinterDocumentJob constructor");
+            throw;
         }
     }
 
@@ -53,20 +69,51 @@ namespace printer_pdf_electron_node
         return cancelled_;
     }
 
-    PDFDocument::PDFDocument(std::wstring &&f) : filename(f) {}
+    PDFDocument::PDFDocument(std::wstring &&f) : filename(f) {
+        LogError("Creating PDFDocument for file: " + std::string(filename.begin(), filename.end()));
+    }
 
     bool PDFDocument::LoadDocument()
     {
-        std::ifstream pdfStream(std::string(filename.begin(), filename.end()),
-                                std::ifstream::binary | std::ifstream::in);
-        file_content.insert(file_content.end(),
-                            std::istreambuf_iterator<char>(pdfStream),
-                            std::istreambuf_iterator<char>());
-        auto pdf_pointer = FPDF_LoadMemDocument(file_content.data(), (int)file_content.size(), nullptr);
-        if (!pdf_pointer)
+        try {
+            LogError("Loading document: " + std::string(filename.begin(), filename.end()));
+            
+            std::ifstream pdfStream(std::string(filename.begin(), filename.end()),
+                                   std::ifstream::binary | std::ifstream::in);
+            
+            if (!pdfStream.is_open()) {
+                LogError("Failed to open PDF file");
+                return false;
+            }
+
+            file_content.insert(file_content.end(),
+                               std::istreambuf_iterator<char>(pdfStream),
+                               std::istreambuf_iterator<char>());
+            
+            if (file_content.empty()) {
+                LogError("PDF file is empty");
+                return false;
+            }
+
+            auto pdf_pointer = FPDF_LoadMemDocument(file_content.data(), (int)file_content.size(), nullptr);
+            if (!pdf_pointer) {
+                DWORD error = FPDF_GetLastError();
+                LogError("Failed to load PDF document. Error: " + std::to_string(error));
+                return false;
+            }
+
+            doc.reset(pdf_pointer);
+            LogError("Document loaded successfully");
+            return true;
+        }
+        catch (const std::exception& e) {
+            LogError("Exception in LoadDocument: " + std::string(e.what()));
             return false;
-        doc.reset(pdf_pointer);
-        return true;
+        }
+        catch (...) {
+            LogError("Unknown exception in LoadDocument");
+            return false;
+        }
     }
 
     void PDFDocument::PrintDocument(DeviceContext dc, const PdfiumOption &options)
@@ -74,11 +121,19 @@ namespace printer_pdf_electron_node
         try {
             PrinterDocumentJob djob(dc, filename);
             if (!djob.Start()) {
-                throw std::runtime_error("Failed to start print job. Error: " + 
-                    std::to_string(GetLastError()));
+                DWORD error = GetLastError();
+                std::string errorMsg = "Failed to start print job. Error: " + std::to_string(error);
+                LogError(errorMsg);
+                throw std::runtime_error(errorMsg);
             }
 
             auto pageCount = FPDF_GetPageCount(doc.get());
+            if (pageCount <= 0) {
+                std::string errorMsg = "Invalid page count: " + std::to_string(pageCount);
+                LogError(errorMsg);
+                throw std::runtime_error(errorMsg);
+            }
+
             auto width = options.width;
             auto height = options.height;
 
@@ -110,8 +165,12 @@ namespace printer_pdf_electron_node
                     }
                 }
             }
+        } catch (const std::exception& e) {
+            LogError(std::string("PrintDocument error: ") + e.what());
+            throw; // Propaga a exceção para ser tratada em nível superior
         } catch (...) {
-            throw; // Simplesmente propaga a exceção
+            LogError("Unknown error in PrintDocument");
+            throw; // Propaga a exceção para ser tratada em nível superior
         }
     }
 
