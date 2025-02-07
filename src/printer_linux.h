@@ -6,8 +6,6 @@
 
 namespace printer_pdf_electron_node
 {
-
-    // Implementation of the forward-declared LinuxPrinter
     class LinuxPrinter : public PrinterInterface
     {
     public:
@@ -24,6 +22,6 @@ namespace printer_pdf_electron_node
         void CleanupOptions();
     };
 
-} // namespace printer_pdf_electron_node
+}
 
 #endif

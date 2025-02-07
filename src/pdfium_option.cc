@@ -28,7 +28,6 @@ namespace printer_pdf_electron_node
 
             ops->dpi = ops->dpi / 72;
 
-            // Process paper size
             if (obj.Has("paperSize"))
             {
                 std::string paperSize = obj.Get("paperSize").ToString().Utf8Value();
@@ -44,7 +43,6 @@ namespace printer_pdf_electron_node
                     ops->paperSize = PaperSize::CUSTOM;
             }
 
-            // Process margins
             if (obj.Has("margins"))
             {
                 auto margins = obj.Get("margins").ToObject();
@@ -58,7 +56,6 @@ namespace printer_pdf_electron_node
                     ops->margins.left = margins.Get("left").ToNumber().FloatValue();
             }
 
-            // Process fit to page option
             if (obj.Has("fitToPage"))
             {
                 ops->fitToPage = obj.Get("fitToPage").ToBoolean();

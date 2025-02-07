@@ -31,13 +31,11 @@ namespace printer_pdf_electron_node
         HDC printer_dc;
     };
 #else
-    // Forward declaration for Linux
     class LinuxPrinter;
 #endif
 
-    // Factory function declaration
     std::unique_ptr<PrinterInterface> CreatePrinter();
 
-} // namespace printer_pdf_electron_node
+}
 
 #endif

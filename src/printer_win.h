@@ -29,7 +29,6 @@ namespace printer_pdf_electron_node
         PrinterDocumentJob(DeviceContext dc, const wchar_t *filename)
             : dc(dc), filename(filename), jobId(0)
         {
-            // Inicializa o trabalho de impressão
             DOC_INFO_1 docInfo;
             docInfo.pDocName = filename;
             docInfo.pOutputFile = NULL;
@@ -59,7 +58,6 @@ namespace printer_pdf_electron_node
             JOB_INFO_1 *pJobInfo = NULL;
             DWORD dwNeeded = 0, dwReturned = 0;
 
-            // Primeira chamada para GetJob para obter o tamanho do buffer
             if (!GetJob(hPrinter, jobId, 1, NULL, 0, &dwNeeded))
             {
                 if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
@@ -76,7 +74,6 @@ namespace printer_pdf_electron_node
                 }
             }
 
-            // Segunda chamada para GetJob para obter as informações do trabalho
             if (!GetJob(hPrinter, jobId, 1, (LPBYTE)pJobInfo, dwNeeded, &dwReturned))
             {
                 free(pJobInfo);

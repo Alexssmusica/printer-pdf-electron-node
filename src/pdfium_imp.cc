@@ -16,8 +16,6 @@ namespace printer_pdf_electron_node
     {
         try
         {
-            LogError("Starting print job for: " + std::string(filename_.begin(), filename_.end()));
-
             DOCINFOW di = {0};
             di.cbSize = sizeof(DOCINFOW);
             di.lpszDocName = filename_.c_str();
@@ -34,8 +32,6 @@ namespace printer_pdf_electron_node
                 LogError(errorMsg);
                 throw std::runtime_error(errorMsg);
             }
-
-            LogError("Print job started successfully");
         }
         catch (const std::exception &e)
         {
@@ -59,13 +55,15 @@ namespace printer_pdf_electron_node
                 {
                     DWORD error = GetLastError();
                     std::cerr << "EndDoc failed with error: " << error << std::endl;
+                    std::string errorMsg = "EndDoc failed with error: " + std::to_string(error);
+                    LogError(errorMsg);
                 }
             }
         }
         catch (...)
         {
-            // Nunca deixar exceções escaparem do destrutor
             std::cerr << "Unexpected error in PrinterDocumentJob destructor" << std::endl;
+            LogError("Unexpected error in PrinterDocumentJob destructor");
         }
     }
 
@@ -81,15 +79,13 @@ namespace printer_pdf_electron_node
 
     PDFDocument::PDFDocument(std::wstring &&f) : filename(f)
     {
-        LogError("Creating PDFDocument for file: " + std::string(filename.begin(), filename.end()));
+        return;
     }
 
     bool PDFDocument::LoadDocument()
     {
         try
         {
-            LogError("Loading document: " + std::string(filename.begin(), filename.end()));
-
             std::ifstream pdfStream(std::string(filename.begin(), filename.end()),
                                     std::ifstream::binary | std::ifstream::in);
 
@@ -118,7 +114,6 @@ namespace printer_pdf_electron_node
             }
 
             doc.reset(pdf_pointer);
-            LogError("Document loaded successfully");
             return true;
         }
         catch (const std::exception &e)
@@ -189,12 +184,12 @@ namespace printer_pdf_electron_node
         catch (const std::exception &e)
         {
             LogError(std::string("PrintDocument error: ") + e.what());
-            throw; // Propaga a exceção para ser tratada em nível superior
+            throw;
         }
         catch (...)
         {
             LogError("Unknown error in PrintDocument");
-            throw; // Propaga a exceção para ser tratada em nível superior
+            throw;
         }
     }
 
@@ -214,7 +209,6 @@ namespace printer_pdf_electron_node
                     throw std::runtime_error("Failed to get page " + std::to_string(index));
                 }
 
-                // Garantir que estamos no modo correto
                 if (!SetGraphicsMode(dc, GM_ADVANCED))
                 {
                     throw std::runtime_error("SetGraphicsMode failed: " + std::to_string(GetLastError()));
@@ -228,27 +222,22 @@ namespace printer_pdf_electron_node
                     throw std::runtime_error("SetBkMode failed: " + std::to_string(GetLastError()));
                 }
 
-                // Get physical page dimensions
                 int physicalWidth = GetDeviceCaps(dc, PHYSICALWIDTH);
                 int physicalHeight = GetDeviceCaps(dc, PHYSICALHEIGHT);
                 int physicalOffsetX = GetDeviceCaps(dc, PHYSICALOFFSETX);
                 int physicalOffsetY = GetDeviceCaps(dc, PHYSICALOFFSETY);
 
-                // Calculate printable area
                 int printableWidth = GetDeviceCaps(dc, HORZRES);
                 int printableHeight = GetDeviceCaps(dc, VERTRES);
 
-                // Apply margins to printable area (converting from points to device units)
                 int marginLeft = static_cast<int>((options.margins.left / 72.0f) * dpiRatio);
                 int marginTop = static_cast<int>((options.margins.top / 72.0f) * dpiRatio);
                 int marginRight = static_cast<int>((options.margins.right / 72.0f) * dpiRatio);
                 int marginBottom = static_cast<int>((options.margins.bottom / 72.0f) * dpiRatio);
 
-                // Adjust printable area considering margins
                 int effectivePrintableWidth = printableWidth - (marginLeft + marginRight);
                 int effectivePrintableHeight = printableHeight - (marginTop + marginBottom);
 
-                // If no width/height specified, get from PDF page
                 if (!width)
                 {
                     auto pageWidth = FPDF_GetPageWidth(page);
@@ -260,37 +249,29 @@ namespace printer_pdf_electron_node
                     height = static_cast<int32_t>(pageHeight * dpiRatio);
                 }
 
-                // Create clipping region for the printable area (including margins)
                 HRGN rgn = CreateRectRgn(0, 0, printableWidth, printableHeight);
                 SelectClipRgn(dc, rgn);
                 DeleteObject(rgn);
 
-                // Clear the background
                 Rectangle(dc, -physicalOffsetX, -physicalOffsetY, physicalWidth, physicalHeight);
 
                 float scale;
                 int32_t x, y;
                 if (options.fitToPage)
                 {
-                    // Calculate scaling to fit page while maintaining aspect ratio
                     float scaleX = static_cast<float>(effectivePrintableWidth) / width;
                     float scaleY = static_cast<float>(effectivePrintableHeight) / height;
                     scale = scaleX < scaleY ? scaleX : scaleY;
 
-                    // Calculate centered position within the effective printable area
                     x = marginLeft + (effectivePrintableWidth - static_cast<int32_t>(width * scale)) / 2;
                     y = marginTop + (effectivePrintableHeight - static_cast<int32_t>(height * scale)) / 2;
                 }
                 else
                 {
-                    // Use actual size (1:1 scale)
                     scale = 1.0f;
-
-                    // Center the content in the available space
                     x = marginLeft + (effectivePrintableWidth - width) / 2;
                     y = marginTop + (effectivePrintableHeight - height) / 2;
 
-                    // If content is larger than printable area, align to top-left corner
                     if (width > effectivePrintableWidth || height > effectivePrintableHeight)
                     {
                         x = marginLeft;
@@ -298,13 +279,11 @@ namespace printer_pdf_electron_node
                     }
                 }
 
-                // Render the PDF page
                 ::FPDF_RenderPage(dc, page, x, y,
                                   static_cast<int32_t>(width * scale),
                                   static_cast<int32_t>(height * scale),
                                   0, FPDF_ANNOT | FPDF_PRINTING);
 
-                // Garantir que todas as operações GDI foram concluídas
                 if (!GdiFlush())
                 {
                     throw std::runtime_error("GdiFlush failed: " + std::to_string(GetLastError()));
@@ -312,19 +291,20 @@ namespace printer_pdf_electron_node
             }
             catch (...)
             {
-                // Propaga a exceção mas garante limpeza adequada
                 throw;
             }
         }
         catch (const std::exception &e)
         {
-            std::cerr << "Error printing page " << index << ": " << e.what() << std::endl;
-            throw; // Propaga para tratamento superior
+            std::string errorMsg = "Error printing page " + std::to_string(index) + ": " + e.what();
+            LogError(errorMsg);
+            throw;
         }
         catch (...)
         {
-            std::cerr << "Unknown error printing page " << index << std::endl;
-            throw; // Propaga para tratamento superior
+            std::string errorMsg = "Unknown error printing page " + std::to_string(index);
+            LogError(errorMsg);
+            throw;
         }
     }
 

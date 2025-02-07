@@ -45,7 +45,6 @@ async function printPDF({
         throw new Error('printerName is required');
     }
 
-    // Verificar se o arquivo existe
     if (!fs.existsSync(filePath)) {
         throw new Error(`PDF file not found: ${filePath}`);
     }
@@ -58,7 +57,6 @@ async function printPDF({
     };
 
     try {
-        // Remover a Promise extra que pode estar mascarando erros
         await printer.printPDF(normalizeString(printerName), normalizeString(filePath), {
             pageList,
             paperSize,
@@ -70,24 +68,12 @@ async function printPDF({
             copies,
         });
     } catch (e) {
-        logError(e, {printerName, filePath});
         throw e;
     }
 }
 
 function normalizeString(str) {
     return String.raw`${str}`
-}
-
-function logError(error, context = {}) {
-    const logDir = path.join(process.cwd(), 'logs');
-    const logFile = path.join(logDir, 'printer-errors.log');
-    if (!fs.existsSync(logDir)) {
-        fs.mkdirSync(logDir, { recursive: true });
-    }
-    const timestamp = new Date().toISOString();
-    const errorMessage = `[${timestamp}] Error: ${error.message}\nStack: ${error.stack}\nContext: ${JSON.stringify(context)}\n\n`;
-    fs.appendFileSync(logFile, errorMessage, 'utf8');
 }
 
 module.exports = {

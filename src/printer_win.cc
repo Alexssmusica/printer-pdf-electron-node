@@ -2,7 +2,7 @@
 #include "pdfium_imp.h"
 #include "utils.h"
 #include <iostream>
-#include <napi.h> // Supondo que você esteja usando o N-API no C++
+#include <napi.h>
 #include <string>
 #include <windows.h>
 namespace printer_pdf_electron_node
@@ -21,8 +21,6 @@ namespace printer_pdf_electron_node
     {
         try
         {
-            LogError("Initializing printer...");
-
             Napi::String printerNameV8Str = printerName.ToString();
             std::u16string u16Str = printerNameV8Str.Utf16Value();
 
@@ -33,8 +31,6 @@ namespace printer_pdf_electron_node
                 wPrinterName[i] = static_cast<wchar_t>(u16Str[i]);
             }
 
-            LogError("Opening printer: " + std::string(wPrinterName.begin(), wPrinterName.end()));
-
             HANDLE hPrinter = nullptr;
             if (!OpenPrinterW(const_cast<LPWSTR>(wPrinterName.c_str()), &hPrinter, NULL))
             {
@@ -44,7 +40,6 @@ namespace printer_pdf_electron_node
                 return error;
             }
 
-            // Usar RAII com escopo local
             struct PrinterHandleCloser
             {
                 void operator()(HANDLE h)
@@ -75,7 +70,6 @@ namespace printer_pdf_electron_node
                 return error;
             }
 
-            // Verificar status da impressora
             if (pi2->Status != 0)
             {
                 std::string status = "Printer status issues:";
@@ -94,7 +88,6 @@ namespace printer_pdf_electron_node
                 return status;
             }
 
-            // Criar DC com tratamento de erro melhorado
             printer_dc = CreateDCW(L"WINSPOOL", wPrinterName.c_str(), NULL, NULL);
             if (!printer_dc)
             {
@@ -116,7 +109,6 @@ namespace printer_pdf_electron_node
                 return error;
             }
 
-            // Configurar o DC com verificação de erros
             if (!SetMapMode(printer_dc, MM_TEXT))
             {
                 std::string error = "Failed to set map mode. Error: " + std::to_string(GetLastError());
@@ -126,7 +118,6 @@ namespace printer_pdf_electron_node
                 return error;
             }
 
-            // Verificar capacidades do dispositivo
             int caps = GetDeviceCaps(printer_dc, TECHNOLOGY);
             if (caps == 0)
             {
@@ -137,7 +128,6 @@ namespace printer_pdf_electron_node
                 return error;
             }
 
-            LogError("Printer initialized successfully");
             return "";
         }
         catch (const std::exception &e)
@@ -174,8 +164,6 @@ namespace printer_pdf_electron_node
 
         try
         {
-            LogError("Starting print job for file: " + filePath);
-
             auto filePathW = std::wstring(filePath.begin(), filePath.end());
             auto doc = std::make_unique<PDFDocument>(std::move(filePathW));
 
@@ -205,7 +193,6 @@ namespace printer_pdf_electron_node
                 return false;
             }
 
-            LogError("Print job completed successfully");
             return true;
         }
         catch (const std::exception &e)
@@ -220,7 +207,6 @@ namespace printer_pdf_electron_node
         }
     }
 
-    // Factory function implementation for Windows
     std::unique_ptr<PrinterInterface> CreatePrinter()
     {
         return std::make_unique<WindowsPrinter>();

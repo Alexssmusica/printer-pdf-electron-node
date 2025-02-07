@@ -7,7 +7,6 @@ const { pipeline } = require('stream/promises');
 
 const platform = os.platform();
 
-// Mapeia o SO para o diretório correto
 const osMap = {
     'win32': 'win',
     'linux': 'linux'
@@ -21,7 +20,6 @@ if (!currentOS) {
     process.exit(1);
 }
 
-// Cria apenas os diretórios necessários para o SO atual
 async function createRequiredDirs() {
     const libPathX64 = path.join(pdfiumDir, 'lib', currentOS, 'x64');
     const libPathX86 = path.join(pdfiumDir, 'lib', currentOS, 'x86');
@@ -159,7 +157,6 @@ async function copyPdfiumFiles() {
 
         }
 
-        // Verifica se todos os arquivos já existem
         const filesExist = await verifyFiles(files);
         if (filesExist) {
             console.log('PDFium files already exist, skipping download');
@@ -183,13 +180,11 @@ async function copyPdfiumFiles() {
     }
 }
 
-// Executa a instalação
 async function install() {
     try {
         await createRequiredDirs();
         await copyPdfiumFiles();
         console.log('Installation completed successfully');
-        // Força o encerramento do processo após a conclusão
         process.exit(0);
     } catch (error) {
         console.error('Installation failed:', error);

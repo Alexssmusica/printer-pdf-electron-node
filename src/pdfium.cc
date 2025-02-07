@@ -83,7 +83,6 @@ namespace printer_pdf_electron_node
 
             auto printer = CreatePrinter();
 
-            // Verifica se há erro na inicialização
             std::string errorMessage = printer->Initialize(printerName);
             if (!errorMessage.empty())
             {
@@ -95,7 +94,6 @@ namespace printer_pdf_electron_node
             auto filePathStr = filePath.As<Napi::String>();
 
 #ifdef _WIN32
-            // Converter UTF-8 para wide string no Windows
             int wlen = MultiByteToWideChar(CP_UTF8, 0, filePathStr.Utf8Value().c_str(), -1, NULL, 0);
             std::wstring wstr(wlen, 0);
             MultiByteToWideChar(CP_UTF8, 0, filePathStr.Utf8Value().c_str(), -1, &wstr[0], wlen);
@@ -141,10 +139,7 @@ namespace printer_pdf_electron_node
     {
         try
         {
-            LogError("Initializing PDFium library");
             FPDF_InitLibrary();
-            LogError("PDFium library initialized successfully");
-
             exports.Set(Napi::String::New(env, "printPDF"),
                         Napi::Function::New(env, PrintPDF));
             return exports;

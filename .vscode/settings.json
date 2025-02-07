@@ -81,7 +81,10 @@
         "xtree": "cpp",
         "chrono": "cpp",
         "fstream": "cpp",
-        "xthread": "cpp"
+        "xthread": "cpp",
+        "iomanip": "cpp",
+        "filesystem": "cpp",
+        "string_view": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

@@ -21,7 +21,6 @@ namespace printer_pdf_electron_node
       {
         loaded_pages.clear();
         doc.reset();
-        LogError("PDFDocument cleaned up successfully");
       }
       catch (...)
       {
