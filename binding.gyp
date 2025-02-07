@@ -60,7 +60,8 @@
                         "src/printer_linux.cc"
                     ],
                     "libraries": [
-                        "-lcups"
+                        "-lcups",
+                        "-Wl,-rpath,'$$ORIGIN'"
                     ],
                     "conditions": [
                         ["target_arch=='x64'", {
