@@ -36,14 +36,19 @@ namespace printer_pdf_electron_node
 
         if (num_dests == 0)
         {
-            return "Nenhuma impressora encontrada.";
+            std::string errorMsg = "No printers found.";
+            LogError(errorMsg);
+            return errorMsg;
         }
+
 
         printer_dest = cupsGetDest(printer_name.c_str(), nullptr, num_dests, dests);
         if (!printer_dest)
         {
             cupsFreeDests(num_dests, dests);
-            return "Impressora não encontrada: " + printer_name;
+            std::string errorMsg = "Printer not found: " + printer_name;
+            LogError(errorMsg);
+            return errorMsg;
         }
 
         cups_dest_t *dest_copy = new cups_dest_t;
@@ -61,7 +66,9 @@ namespace printer_pdf_electron_node
                                     nullptr); // cancel
         if (!http)
         {
-            return "Falha ao conectar ao servidor CUPS.";
+            std::string errorMsg = "Failed to connect to CUPS server.";
+            LogError(errorMsg);
+            return errorMsg;
         }
 
         ipp_t *request = ippNewRequest(CUPS_GET_PRINTERS);
@@ -71,7 +78,9 @@ namespace printer_pdf_electron_node
         if (!response)
         {
             httpClose(http);
-            return "Falha ao obter informações da impressora: " + printer_name;
+            std::string errorMsg = "Failed to get printer information: " + printer_name;
+            LogError(errorMsg);
+            return errorMsg;
         }
 
         ippDelete(response);
