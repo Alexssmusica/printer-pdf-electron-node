@@ -2,6 +2,7 @@
 #include <napi.h>
 #include <cups/cups.h>
 #include <cstring>
+#include "utils.h"
 
 namespace printer_pdf_electron_node
 {
