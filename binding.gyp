@@ -4,14 +4,19 @@
             "target_name": "printer_pdf_electron_node",
             "cflags!": [ "-fno-exceptions" ],
             "cflags_cc!": [ "-fno-exceptions" ],
+            "cflags_cc": ["-std=c++17"],
             "binding_name": "printer_pdf_electron_node",
             "xcode_settings": { 
                 "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
                 "CLANG_CXX_LIBRARY": "libc++",
-                "MACOSX_DEPLOYMENT_TARGET": "10.7"
+                "MACOSX_DEPLOYMENT_TARGET": "10.7",
+                "CLANG_CXX_LANGUAGE_STANDARD": "c++17"
             },
             "msvs_settings": {
-                "VCCLCompilerTool": { "ExceptionHandling": 1 }
+                "VCCLCompilerTool": { 
+                    "ExceptionHandling": 1,
+                    "AdditionalOptions": ["/std:c++17"]
+                }
             },
             "sources": [
                 "src/pdfium.cc",
