@@ -1,3 +1,12 @@
+## [1.3.6](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.3.5...v1.3.6) (2025-02-10)
+
+
+### Bug Fixes
+
+* gravar log de erros linux ([e7d7b66](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/e7d7b66be733a31d31d8178d588fe2b375744281))
+* include "utils.h" ([14df500](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/14df500ff2d29bc5f2064003175ea78e9fe54a4f))
+* tratamento de logs ([3b77e49](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/3b77e49bfb65d59ed21dac4c14c6db83c769e320))
+
 ## [1.3.5](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.3.4...v1.3.5) (2025-02-06)
 
 
