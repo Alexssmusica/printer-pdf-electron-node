@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.4.0...v1.4.1) (2025-02-11)
+
+
+### Bug Fixes
+
+* arquivos na lib ([eddc95d](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/eddc95df72d93abf84c14eacd8200059c3b3fe54))
+
 # [1.4.0](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.3.7...v1.4.0) (2025-02-11)
 
 
