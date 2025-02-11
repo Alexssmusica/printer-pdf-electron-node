@@ -70,6 +70,7 @@
     "index.d.ts",
     "install.js",
     "src/**/**/*",
+    "lib/**/**/*",
     "build/Release/*.node"
   ]
 }
