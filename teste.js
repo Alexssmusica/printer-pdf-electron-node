@@ -1,4 +1,4 @@
-const { printPDF } = require('./');
+const { printPDF } = require('./lib/');
 const path = require('path');
 
 const filePath = path.join(__dirname, 'pré-venda.pdf')

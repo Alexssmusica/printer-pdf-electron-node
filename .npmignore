@@ -28,3 +28,7 @@ teste.js
 commands.js
 .env.example
 pdfium/
+packages/
+tsconfig.json
+tsconfig-build.json
+tsconfig-build.tsbuildinfo

@@ -66,3 +66,5 @@ prebuilds
 src/.DS_Store
 .prebuildrc
 *.pdf
+lib/
+tsconfig-build.tsbuildinfo
