@@ -1,3 +1,10 @@
+## [1.4.2](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.4.1...v1.4.2) (2025-02-12)
+
+
+### Bug Fixes
+
+* fechar o arquivo de log depois de escrever ([405efeb](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/405efeb3389ba2ed0060235d0d40cb05a5211bbd))
+
 ## [1.4.1](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.4.0...v1.4.1) (2025-02-11)
 
 
