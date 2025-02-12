@@ -30,14 +30,8 @@ namespace printer_pdf_electron_node
     {
         try
         {
-            // Cria o diretório logs usando std::filesystem
             std::filesystem::create_directories("logs");
-
-            static std::ofstream logFile;
-            if (!logFile.is_open())
-            {
-                logFile.open("logs/printer-errors.log", std::ios::app);
-            }
+            std::ofstream logFile("logs/printer-errors.log", std::ios::app);
 
             if (logFile.is_open())
             {
@@ -60,6 +54,7 @@ namespace printer_pdf_electron_node
 #endif
 
                 logFile.flush();
+                logFile.close();
             }
         }
         catch (...)
