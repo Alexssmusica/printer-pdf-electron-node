@@ -41,7 +41,8 @@
                             "libraries": ["<(module_root_dir)/pdfium/lib/win/x64/lib/pdfium.dll.lib"],
                             "copies": [{
                                 "destination": "<(PRODUCT_DIR)",
-                                "files": ["<(module_root_dir)/pdfium/lib/win/x64/bin/pdfium.dll"]
+                                "files": ["<(module_root_dir)/pdfium/lib/win/x64/bin/pdfium.dll"],
+                                "keep_outputs": "true"
                             }]
                         }],
                         ["target_arch=='ia32'", {
