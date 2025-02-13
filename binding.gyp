@@ -42,7 +42,18 @@
                             "copies": [{
                                 "destination": "<(PRODUCT_DIR)",
                                 "files": ["<(module_root_dir)/pdfium/lib/win/x64/bin/pdfium.dll"],
-                                "keep_outputs": "true"
+                                "keep_outputs": "true",
+                                "conditions": [
+                                    ["OS=='win'", {
+                                        "msvs_settings": {
+                                            "VCPostBuildEventTool": {
+                                                "CommandLine": [
+                                                    "copy /Y \"$(ProjectDir)\\pdfium\\lib\\win\\x64\\bin\\pdfium.dll\" \"$(TargetDir)\""
+                                                ]
+                                            }
+                                        }
+                                    }]
+                                ]
                             }]
                         }],
                         ["target_arch=='ia32'", {
