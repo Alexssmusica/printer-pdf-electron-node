@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:Alexssmusica/printer-pdf-electron-node.git"
+    "url": "git+ssh://git@github.com/Alexssmusica/printer-pdf-electron-node.git"
   },
   "keywords": [
     "pdf",
