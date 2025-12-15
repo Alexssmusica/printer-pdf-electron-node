@@ -4,7 +4,6 @@
   "description": "node bindings for printer pdf node and electron",
   "main": "./lib/index.js",
   "scripts": {
-    "preinstall": "node install.js",
     "install": "node-gyp rebuild",
     "prebuild:master": "prebuild-install || node-gyp rebuild",
     "clean:lib": "rimraf lib/ && rimraf tsconfig-build.tsbuildinfo",
