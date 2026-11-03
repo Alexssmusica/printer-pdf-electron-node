@@ -13,13 +13,13 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
       
-      - name: Configurar Node.js 20.x
+      - name: Configurar Node.js 22.22.2
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: 22.22.2
       
       - name: Instalar dependências
-        run: npm install --no-save
+        run: npm ci
       
       - name: Pre Build node x64
         run: npm run prebuild:master
@@ -49,13 +49,13 @@ jobs:
           sudo apt-get install -y gcc-multilib g++-multilib libc6-dev-i386 linux-libc-dev:i386 libcups2-dev:i386 python3-dev
           sudo ldconfig
       
-      - name: Configurar Node.js 20.x
+      - name: Configurar Node.js 22.22.2
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: 22.22.2
       
       - name: Instalar dependências
-        run: npm install --no-save
+        run: npm ci
       
       - name: Pre Build node x64
         run: npm run prebuild:master

@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest]
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [22.22.2, 24.x]
 
     steps:
       - name: Checkout do código
@@ -31,7 +31,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Instalar dependências
-        run: npm install --no-save
+        run: npm ci
 
       - name: Rebuild do projeto
         run: npm run rebuild

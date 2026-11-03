@@ -16,7 +16,7 @@ Uma biblioteca Node.js para impressão de arquivos PDF com suporte avançado a c
 
 ## Requisitos
 
-- Node.js >= 18.20.6
+- Node.js >= 22.22.2
 - Electron >= 20.0.0
 - Windows ou Linux
 - Para Windows: Visual Studio Build Tools
