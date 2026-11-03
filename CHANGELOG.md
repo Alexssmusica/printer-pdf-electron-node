@@ -1,3 +1,15 @@
+# [1.5.0](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.4.4...v1.5.0) (2026-11-03)
+
+
+### Bug Fixes
+
+* drop deprecated baseUrl from tsconfig for TS 6 ([d6aa34b](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/d6aa34bea6db4942ac1a10a49da809414c7b7598))
+
+
+### Features
+
+* add paper orientation and align the release scripts ([60b101d](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/60b101d995dbc212ec8c33ac54708eb95b14e3c2))
+
 ## [1.4.4](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.4.3...v1.4.4) (2025-12-15)
 
 
