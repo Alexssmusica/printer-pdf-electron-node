@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.5.0...v1.5.1) (2026-11-03)
+
+
+### Bug Fixes
+
+* restore npm auth for publish script ([52bc8aa](https://github.com/Alexssmusica/printer-pdf-electron-node/commit/52bc8aa75dfa8be18bf141638e22d2fd2a2d2d5f))
+
 # [1.5.0](https://github.com/Alexssmusica/printer-pdf-electron-node/compare/v1.4.4...v1.5.0) (2026-11-03)
 
 
