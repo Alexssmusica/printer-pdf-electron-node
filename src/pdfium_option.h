@@ -13,6 +13,12 @@ namespace printer_pdf_electron_node
         CUSTOM
     };
 
+    enum class PaperOrientation
+    {
+        Portrait,
+        Landscape
+    };
+
     struct Margins
     {
         float top = 0;
@@ -30,6 +36,7 @@ namespace printer_pdf_electron_node
         int32_t width = 0;
         int32_t height = 0;
         PaperSize paperSize = PaperSize::A4;
+        PaperOrientation orientation = PaperOrientation::Portrait;
         Margins margins;
         bool fitToPage = true;
         std::vector<std::pair<int32_t, int32_t>> page_list;

@@ -27,7 +27,7 @@ namespace printer_pdf_electron_node
         }
     }
 
-    std::string LinuxPrinter::Initialize(const Napi::Value &printerName)
+    std::string LinuxPrinter::Initialize(const Napi::Value &printerName, const PdfiumOption &)
     {
         Napi::String printerNameV8Str = printerName.ToString();
         printer_name = printerNameV8Str.Utf8Value();
@@ -113,6 +113,10 @@ namespace printer_pdf_electron_node
             num_options = cupsAddOption("media", "A4", num_options, &this->options);
             break;
         }
+
+        const char *orientationValue =
+            options.orientation == PaperOrientation::Landscape ? "4" : "3";
+        num_options = cupsAddOption("orientation-requested", orientationValue, num_options, &this->options);
 
         if (options.fitToPage)
         {

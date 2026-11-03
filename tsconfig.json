@@ -5,18 +5,12 @@
     "outDir": "lib",
     "rootDir": "packages",
     "paths": {
-      "@/packages": [
-        "packages"
-      ]
+      "@/packages": ["packages"]
     },
     "allowJs": false,
     "checkJs": false,
     "noEmit": true
   },
-  "include": [
-    "packages/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["packages/**/*.ts"],
+  "exclude": ["node_modules"]
 }

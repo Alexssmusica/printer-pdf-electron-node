@@ -82,15 +82,14 @@ namespace printer_pdf_electron_node
             CHECK_STRING(filePath)
 
             auto printer = CreatePrinter();
+            std::unique_ptr<PdfiumOption> options(V8OptionToStruct(v8_options));
 
-            std::string errorMessage = printer->Initialize(printerName);
+            std::string errorMessage = printer->Initialize(printerName, *options);
             if (!errorMessage.empty())
             {
                 Napi::Error::New(env, errorMessage).ThrowAsJavaScriptException();
                 return;
             }
-
-            std::unique_ptr<PdfiumOption> options(V8OptionToStruct(v8_options));
             auto filePathStr = filePath.As<Napi::String>();
 
 #ifdef _WIN32

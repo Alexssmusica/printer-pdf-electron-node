@@ -5,6 +5,60 @@
 #include <napi.h>
 #include <string>
 #include <windows.h>
+#include <winspool.h>
+
+namespace
+{
+    std::string BuildOrientedDevMode(
+        HANDLE hPrinter,
+        const std::wstring &printerName,
+        printer_pdf_electron_node::PaperOrientation orientation,
+        std::vector<BYTE> &outDevMode)
+    {
+        LPWSTR deviceName = const_cast<LPWSTR>(printerName.c_str());
+
+        LONG devModeSize = DocumentPropertiesW(NULL, hPrinter, deviceName, NULL, NULL, 0);
+        if (devModeSize <= 0)
+        {
+            return "Failed to get printer DEVMODE size. Error code: " + std::to_string(GetLastError());
+        }
+
+        std::vector<BYTE> current(static_cast<size_t>(devModeSize));
+        DEVMODEW *currentMode = reinterpret_cast<DEVMODEW *>(current.data());
+
+        if (DocumentPropertiesW(NULL, hPrinter, deviceName, currentMode, NULL, DM_OUT_BUFFER) != IDOK)
+        {
+            return "Failed to read printer DEVMODE. Error code: " + std::to_string(GetLastError());
+        }
+
+        const short paperOrientation =
+            orientation == printer_pdf_electron_node::PaperOrientation::Landscape
+                ? DMORIENT_LANDSCAPE
+                : DMORIENT_PORTRAIT;
+        currentMode->dmFields |= DM_ORIENTATION;
+        currentMode->dmOrientation = paperOrientation;
+
+        outDevMode.assign(static_cast<size_t>(devModeSize), 0);
+        DEVMODEW *orientedMode = reinterpret_cast<DEVMODEW *>(outDevMode.data());
+
+        if (DocumentPropertiesW(
+                NULL,
+                hPrinter,
+                deviceName,
+                orientedMode,
+                currentMode,
+                DM_IN_BUFFER | DM_OUT_BUFFER) != IDOK)
+        {
+            outDevMode = std::move(current);
+            return "";
+        }
+
+        orientedMode->dmFields |= DM_ORIENTATION;
+        orientedMode->dmOrientation = paperOrientation;
+        return "";
+    }
+}
+
 namespace printer_pdf_electron_node
 {
 
@@ -17,7 +71,7 @@ namespace printer_pdf_electron_node
         }
     }
 
-    std::string WindowsPrinter::Initialize(const Napi::Value &printerName)
+    std::string WindowsPrinter::Initialize(const Napi::Value &printerName, const PdfiumOption &options)
     {
         try
         {
@@ -88,7 +142,20 @@ namespace printer_pdf_electron_node
                 return status;
             }
 
-            printer_dc = CreateDCW(L"WINSPOOL", wPrinterName.c_str(), NULL, NULL);
+            std::vector<BYTE> devModeBuffer;
+            std::string devModeError = BuildOrientedDevMode(
+                hPrinter,
+                wPrinterName,
+                options.orientation,
+                devModeBuffer);
+            if (!devModeError.empty())
+            {
+                LogError(devModeError);
+                return devModeError;
+            }
+
+            DEVMODEW *pDevMode = reinterpret_cast<DEVMODEW *>(devModeBuffer.data());
+            printer_dc = CreateDCW(L"WINSPOOL", wPrinterName.c_str(), NULL, pDevMode);
             if (!printer_dc)
             {
                 DWORD errorCode = GetLastError();

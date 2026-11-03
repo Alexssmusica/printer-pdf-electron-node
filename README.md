@@ -6,6 +6,7 @@ Uma biblioteca Node.js para impressão de arquivos PDF com suporte avançado a c
 
 - 🖨️ Impressão direta de PDFs para qualquer impressora do sistema
 - 📏 Suporte a diferentes tamanhos de papel (A4, Letter, Legal, A3, Custom)
+- ↔️ Orientação do papel (retrato ou paisagem) por trabalho de impressão
 - 📑 Impressão de páginas específicas ou intervalos
 - 🔄 Ajuste automático do conteúdo à página
 - 📐 Configuração precisa de margens
@@ -66,6 +67,7 @@ async function imprimirDocumentoAvancado() {
             // Parâmetros opcionais
             pageList: [[1, 3], [5, 7]], // Imprime páginas 1-3 e 5-7
             paperSize: 'A4',            // 'A4' | 'LETTER' | 'LEGAL' | 'A3' | 'CUSTOM'
+            orientation: 'portrait',    // 'portrait' | 'landscape'
             margins: {
                 top: 0.5,    // margens em polegadas
                 right: 0.5,
@@ -88,7 +90,7 @@ async function imprimirDocumentoAvancado() {
 ### TypeScript
 
 ```typescript
-import { printPDF, PrintPDFOptions, PaperSize, Margins } from 'printer-pdf-electron-node';
+import { printPDF, PrintPDFOptions, PaperSize, PaperOrientation, Margins } from 'printer-pdf-electron-node';
 
 // Definindo as margens
 const margins: Margins = {
@@ -104,6 +106,7 @@ const options: PrintPDFOptions = {
     printerName: 'Nome da Impressora',
     pageList: [[1, 3], [5, 7]],
     paperSize: 'A4',
+    orientation: 'landscape',
     margins,
     fitToPage: true,
     dpi: 300,
@@ -132,6 +135,7 @@ async function imprimirDocumento() {
 | printerName  | string                    | Sim         | -       | Nome da impressora                           |
 | pageList     | Array<[number, number]>   | Não         | []      | Lista de intervalos de páginas para imprimir |
 | paperSize    | PaperSize                 | Não         | 'A4'    | Tamanho do papel                            |
+| orientation  | PaperOrientation          | Não         | 'portrait' | Orientação do papel (`portrait` ou `landscape`) |
 | margins      | Margins                   | Não         | {0,0,0,0}| Margens em polegadas                        |
 | fitToPage    | boolean                   | Não         | true    | Ajustar conteúdo à página                   |
 | width        | number                    | Não         | 0       | Largura personalizada (em pontos)            |
@@ -143,6 +147,7 @@ async function imprimirDocumento() {
 
 ```typescript
 type PaperSize = 'A4' | 'LETTER' | 'LEGAL' | 'A3' | 'CUSTOM';
+type PaperOrientation = 'portrait' | 'landscape';
 
 interface Margins {
     top?: number;    // em polegadas
@@ -158,6 +163,7 @@ interface Margins {
 - Para tamanhos de papel personalizados (paperSize: 'CUSTOM'), width e height são especificados em pontos (1 ponto = 1/72 polegada)
 - O DPI padrão é 300, que oferece um bom equilíbrio entre qualidade e performance
 - A opção fitToPage garante que o conteúdo se ajuste à área imprimível da página
+- `orientation` vale para o trabalho inteiro. No Windows ela entra no DEVMODE da impressora (`DMORIENT_PORTRAIT` / `DMORIENT_LANDSCAPE`). No Linux o CUPS recebe `orientation-requested` (`3` retrato, `4` paisagem). Se algum driver CUPS ignorar esse atributo, a alternativa é a opção `landscape`
 
 ## Licença
 

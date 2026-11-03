@@ -32,3 +32,6 @@ tsconfig.json
 tsconfig-build.json
 tsconfig-build.tsbuildinfo
 install.js
+publish.js
+.prettierignore
+.prettierrc

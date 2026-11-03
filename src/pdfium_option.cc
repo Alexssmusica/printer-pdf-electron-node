@@ -43,6 +43,15 @@ namespace printer_pdf_electron_node
                     ops->paperSize = PaperSize::CUSTOM;
             }
 
+            if (obj.Has("orientation"))
+            {
+                std::string orientation = obj.Get("orientation").ToString().Utf8Value();
+                if (orientation == "landscape")
+                    ops->orientation = PaperOrientation::Landscape;
+                else
+                    ops->orientation = PaperOrientation::Portrait;
+            }
+
             if (obj.Has("margins"))
             {
                 auto margins = obj.Get("margins").ToObject();

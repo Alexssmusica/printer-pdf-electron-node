@@ -11,7 +11,7 @@ namespace printer_pdf_electron_node
     public:
         LinuxPrinter() = default;
         ~LinuxPrinter();
-        std::string Initialize(const Napi::Value &printerName) override;
+        std::string Initialize(const Napi::Value &printerName, const PdfiumOption &options) override;
         bool Print(const std::string &filePath, const PdfiumOption &options) override;
 
     private:
