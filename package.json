@@ -43,25 +43,25 @@
   "homepage": "https://github.com/Alexssmusica/printer-pdf-electron-node#readme",
   "dependencies": {
     "bindings": "1.5.0",
-    "dotenv": "17.2.3",
-    "node-addon-api": "8.5.0",
-    "node-gyp": "12.1.0"
+    "dotenv": "18.0.9",
+    "node-addon-api": "8.9.2",
+    "node-gyp": "13.1.0"
   },
   "devDependencies": {
-    "@semantic-release/changelog": "6.0.3",
+    "@semantic-release/changelog": "7.0.0",
     "@semantic-release/commit-analyzer": "13.0.1",
-    "@semantic-release/git": "10.0.1",
-    "@semantic-release/github": "11.0.6",
-    "@semantic-release/npm": "12.0.2",
-    "@semantic-release/release-notes-generator": "14.1.0",
+    "@semantic-release/git": "11.0.1",
+    "@semantic-release/github": "12.0.10",
+    "@semantic-release/npm": "13.2.0",
+    "@semantic-release/release-notes-generator": "14.1.1",
     "@tsconfig/node18": "^18.2.4",
     "@types/bindings": "^1.5.5",
     "@types/node": "22.12.0",
     "prebuild-install": "^7.1.3",
     "prettier": "^3.9.10",
-    "rimraf": "^6.1.2",
+    "rimraf": "^6.1.4",
     "semantic-release": "^25.0.9",
-    "typescript": "5.7.3"
+    "typescript": "6.0.3"
   },
   "engines": {
     "node": ">= 18.20.6"
