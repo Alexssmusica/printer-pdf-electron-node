@@ -10,7 +10,8 @@ try {
     stdio: 'inherit',
     env: {
       ...process.env,
-      NPM_TOKEN: process.env.NPM_TOKEN
+      NPM_TOKEN: process.env.NPM_TOKEN,
+      NODE_AUTH_TOKEN: process.env.NPM_TOKEN
     }
   });
   console.log('Publicação concluída com sucesso!');
