@@ -1,5 +1,7 @@
 # printer-pdf-electron-node
 
+Print PDFs directly to system printers from **Node.js** and **Electron**. Supports paper size, orientation, margins, page ranges, and DPI on **Windows** and **Linux**.
+
 Uma biblioteca Node.js para impressão de arquivos PDF com suporte avançado a configurações de impressão. Funciona com Node.js e Electron.
 
 ## Características

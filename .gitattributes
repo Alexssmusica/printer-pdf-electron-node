@@ -1,0 +1,6 @@
+# Vendor / build output — excluded from GitHub language stats
+pdfium/** linguist-vendored
+build/** linguist-vendored
+
+# Public TypeScript API
+packages/** linguist-detectable=true

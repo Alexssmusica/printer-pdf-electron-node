@@ -1,7 +1,7 @@
 {
   "name": "printer-pdf-electron-node",
   "version": "1.5.1",
-  "description": "node bindings for printer pdf node and electron",
+  "description": "Print PDFs to system printers from Node.js and Electron (paper size, orientation, margins, page ranges, DPI). Windows and Linux.",
   "main": "./lib/index.js",
   "scripts": {
     "install": "node-gyp rebuild",
@@ -21,8 +21,16 @@
   "keywords": [
     "pdf",
     "printer",
+    "nodejs",
     "node",
-    "electron"
+    "electron",
+    "windows",
+    "linux",
+    "typescript",
+    "native-addon",
+    "node-gyp",
+    "cups",
+    "pdfium"
   ],
   "author": {
     "name": "Alex Santos de Souza",
